@@ -1,0 +1,9 @@
+[user]
+	name = Lawand Othman
+	email = lwnd@pm.me
+[core]
+	editor = vim
+[pull]
+	ff = only
+[color]
+	ui = auto
