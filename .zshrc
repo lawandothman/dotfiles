@@ -121,4 +121,4 @@ fi
 # tabtab source for packages
 # uninstall by removing these lines
 [[ -f ~/.config/tabtab/__tabtab.zsh ]] && . ~/.config/tabtab/__tabtab.zsh || true
-alias config='/usr/bin/git --git-dir=/Users/lawandothman/.cfg/ --work-tree=/Users/lawandothman'
+alias config='/opt/homebrew/bin/git --git-dir=/Users/lawandothman/.cfg/ --work-tree=/Users/lawandothman'
