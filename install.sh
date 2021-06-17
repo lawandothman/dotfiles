@@ -24,6 +24,8 @@ echo 🔃 Installing Git 🔃
 brew install git
 echo 📟 Installing Oh My Zsh 📟
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+echo ▲ Installing Vercel Zsh Theme ▲
+curl https://raw.githubusercontent.com/vercel/zsh-theme/master/vercel.zsh-theme -Lo ~/.oh-my-zsh/custom/themes/vercel.zsh-theme
 echo 🌐 Installing Node.js 🌐
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
 source ~/.zshrc
