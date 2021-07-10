@@ -33,6 +33,6 @@ nvm install node
 nvm use node
 npm install -g yarn
 echo 🔗 Creating Symbolic Links For Your Dotfiles 🔗
-ln -s .zshrc ~/.zshrc
-ln -s .vimrc ~/.vimrc
-ln -s .gitconfig ~/.gitconfig
+sudo ln .zshrc ~/.zshrc
+sudo ln .vimrc ~/.vimrc
+sudo ln .gitconfig ~/.gitconfig
