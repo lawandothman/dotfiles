@@ -32,13 +32,7 @@ source ~/.zshrc
 nvm install node
 nvm use node
 npm install -g yarn
-echo 🚀 Cloning your dotfiles from GitHub 🚀
-alias config='/opt/homebrew/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-echo ".cfg" >> .gitignore
-git clone --bare https://github.com/lawandothman/dotfiles.git $HOME/.cfg
-alias config='/opt/homebrew/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
-mkdir -p .config-backup && \
-config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | \
-xargs -I{} mv {} .config-backup/{}
-config checkout
-config config --local status.showUntrackedFiles no
+echo 🔗 Creating Symbolic Links For Your Dotfiles 🔗
+ln -s .zshrc ~/.zshrc
+ln -s .vimrc ~/.vimrc
+ln -s .gitconfig ~/.gitconfig
