@@ -2,14 +2,14 @@
 This repository includes a `install.sh` script to set up my development environment on a fresh MacOS install, it also includes my dotfiles.
 
 ## Usage
-1) Clone the repository by running: 
+1) Clone the repository by running:
 ``` shell
 git clone https://github.com/lawandothman/dotfiles.git
 ```
 
 2) Run the `install.sh` script from the repository in the terminal by running:
 ```shell
-bash install.sh
+zsh install.sh
 ```
 
 3) Set up SSH keys to communicate with GitHub:
