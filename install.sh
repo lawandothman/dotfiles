@@ -23,7 +23,7 @@ brew install --cask \
 echo 🔃 Installing Git 🔃
 brew install git
 echo 📟 Installing Oh My Zsh 📟
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 echo ▲ Installing Vercel Zsh Theme ▲
 curl https://raw.githubusercontent.com/vercel/zsh-theme/master/vercel.zsh-theme -Lo ~/.oh-my-zsh/custom/themes/vercel.zsh-theme
 echo 🌐 Installing Node.js 🌐
