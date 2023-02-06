@@ -2,6 +2,12 @@
 
 set -e
 
+echo "Installing Brew..."
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+echo "Installing Packages..."
+brew bundle
+
 CONFIG="install.conf.yaml"
 DOTBOT_DIR="dotbot"
 

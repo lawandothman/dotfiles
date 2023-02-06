@@ -3,6 +3,7 @@
 - link:
     ~/.profile: profile
     ~/.bashrc: bashrc
+    ~/.config/nvim: .config/nvim
     ~/.gitconfig: gitconfig
     ~/.ssh/config:
         path: ssh/config

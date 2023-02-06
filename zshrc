@@ -119,9 +119,9 @@ export PNPM_HOME="/Users/Lawand/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
 
-# Fig post block. Keep at the bottom of this file.
-[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
-
 # Deno
 export DENO_INSTALL="/Users/Lawand/.deno"
 export PATH="$DENO_INSTALL/bin:$PATH"
+
+# Fig post block. Keep at the bottom of this file.
+[[ -f "$HOME/.fig/shell/zshrc.post.zsh" ]] && builtin source "$HOME/.fig/shell/zshrc.post.zsh"
