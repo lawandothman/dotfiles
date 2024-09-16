@@ -90,6 +90,9 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.g.loaded_netrw = 1 -- Disable netrw
+vim.g.loaded_netrwPlugin = 1 -- Disable netrw
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -148,10 +151,27 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+vim.opt.backup = false -- Creates a backup file
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 vim.keymap.set('i', 'jj', '<Esc>', { noremap = true, desc = 'Exit insert mode with jj' })
 vim.keymap.set('i', 'jk', '<Esc>', { noremap = true, desc = 'Exit insert mode with jk' })
+
+-- Keep cursor centered when scrolling
+vim.keymap.set('n', '<C-d>', '<C-d>zz', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-u>', '<C-u>zz', { noremap = true, silent = true })
+
+-- Move selected line / block of text in visual mode
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
+
+-- Paste over currently selected text without yanking it
+vim.keymap.set('v', 'p', '"_dp')
+vim.keymap.set('v', 'P', '"_dP')
+
+-- Select all
+vim.keymap.set('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
@@ -321,7 +341,7 @@ require('lazy').setup {
       -- Useful for getting pretty icons, but requires special font.
       --  If you already have a Nerd Font, or terminal set up with fallback fonts
       --  you can enable this
-      -- { 'nvim-tree/nvim-web-devicons' }
+      { 'nvim-tree/nvim-web-devicons' },
     },
     config = function()
       -- Telescope is a fuzzy finder that comes with a lot of different things that
@@ -494,7 +514,7 @@ require('lazy').setup {
 
           -- Opens a popup that displays documentation about the word under your cursor
           --  See `:help K` for why this keymap
-          map('K', vim.lsp.buf.hover, 'Hover Documentation')
+          map('gh', vim.lsp.buf.hover, 'Hover Documentation')
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header
@@ -808,6 +828,71 @@ require('lazy').setup {
       --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
       --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+    end,
+  },
+
+  {
+    'goolord/alpha-nvim',
+    enable = true,
+    event = 'VimEnter',
+    lazy = true,
+    opts = function()
+      local dashboard = require 'alpha.themes.dashboard'
+      local logo = [[
+
+███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗
+████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║
+██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║
+██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║
+██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║
+╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝
+
+]]
+      dashboard.section.header.val = vim.split(logo, '\n')
+      dashboard.section.buttons.val = {
+        dashboard.button('f', ' ' .. ' Find file', ':Telescope find_files <CR>'),
+        -- dashboard.button("n", " " .. " New file", ":ene <BAR> startinsert <CR>"),
+        dashboard.button('r', ' ' .. ' Recent files', ':Telescope oldfiles <CR>'),
+        -- dashboard.button("g", " " .. " Find text", ":Telescope live_grep <CR>"),
+        dashboard.button('s', ' ' .. 'Restore Session', '<cmd>lua require("persistence").load()<cr>'),
+        dashboard.button('c', ' ' .. ' Config', ':e ~/.config/nvim/ <CR>'),
+        -- dashboard.button("l", "󰒲 " .. " Lazy", ":Lazy<CR>"),
+        dashboard.button('q', ' ' .. ' Quit', ':qa<CR>'),
+      }
+      for _, button in ipairs(dashboard.section.buttons.val) do
+        button.opts.hl = 'AlphaButtons'
+        button.opts.hl_shortcut = 'AlphaShortcut'
+      end
+      dashboard.section.header.opts.hl = 'AlphaHeader'
+      dashboard.section.buttons.opts.hl = 'AlphaButtons'
+      dashboard.section.footer.opts.hl = 'AlphaFooter'
+      dashboard.opts.layout[1].val = 8
+      return dashboard
+    end,
+
+    config = function(_, dashboard)
+      -- close Lazy and re-open when the dashboard is ready
+      if vim.o.filetype == 'lazy' then
+        vim.cmd.close()
+        vim.api.nvim_create_autocmd('User', {
+          pattern = 'AlphaReady',
+          callback = function()
+            require('lazy').show()
+          end,
+        })
+      end
+
+      require('alpha').setup(dashboard.opts)
+
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'LazyVimStarted',
+        callback = function()
+          local stats = require('lazy').stats()
+          local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+          dashboard.section.footer.val = '⚡ Neovim loaded ' .. stats.count .. ' plugins in ' .. ms .. 'ms'
+          pcall(vim.cmd.AlphaRedraw)
+        end,
+      })
     end,
   },
 
