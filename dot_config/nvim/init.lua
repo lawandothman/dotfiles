@@ -289,23 +289,22 @@ require('lazy').setup {
   -- after the plugin has been loaded:
   --  config = function() ... end
 
-  { -- Useful plugin to show you pending keybinds.
+  {
     'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
+    event = 'VimEnter',
+    config = function()
       require('which-key').setup()
 
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      -- Updated keybinding registration with the latest spec
+      require('which-key').add {
+        { '<leader>c', group = '[C]ode' },
+        { '<leader>d', group = '[D]ocument' },
+        { '<leader>r', group = '[R]ename' },
+        { '<leader>s', group = '[S]earch' },
+        { '<leader>w', group = '[W]orkspace' },
       }
     end,
   },
-
   {
     'github/copilot.vim',
   },
@@ -567,7 +566,7 @@ require('lazy').setup {
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
+        ts_ls = {},
         eslint = {
           on_attach = function(_, bufnr)
             vim.api.nvim_create_autocmd('BufWritePre', {
@@ -576,8 +575,6 @@ require('lazy').setup {
             })
           end,
         },
-        --
-
         lua_ls = {
           -- cmd = {...},
           -- filetypes { ...},
@@ -692,6 +689,33 @@ require('lazy').setup {
       -- See `:help cmp`
       local cmp = require 'cmp'
       local luasnip = require 'luasnip'
+      local kind_icons = {
+        Text = '',
+        Method = '󰆧',
+        Function = '󰊕',
+        Constructor = '',
+        Field = '󰇽',
+        Variable = '󰂡',
+        Class = '󰠱',
+        Interface = '',
+        Module = '',
+        Property = '󰜢',
+        Unit = '',
+        Value = '󰎠',
+        Enum = '',
+        Keyword = '󰌋',
+        Snippet = '',
+        Color = '󰏘',
+        File = '󰈙',
+        Reference = '',
+        Folder = '󰉋',
+        EnumMember = '',
+        Constant = '󰏿',
+        Struct = '',
+        Event = '',
+        Operator = '󰆕',
+        TypeParameter = '󰅲',
+      }
       luasnip.config.setup {}
 
       cmp.setup {
@@ -721,6 +745,8 @@ require('lazy').setup {
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
           ['<C-Space>'] = cmp.mapping.complete {},
+          ['<C-d>'] = cmp.mapping.scroll_docs(4),
+          ['<C-u>'] = cmp.mapping.scroll_docs(-4),
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -741,10 +767,39 @@ require('lazy').setup {
             end
           end, { 'i', 's' }),
         },
+        window = {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        },
         sources = {
+          { name = 'copilot' },
           { name = 'nvim_lsp' },
+          { name = 'nvim_lua' },
           { name = 'luasnip' },
+          { name = 'buffer' },
           { name = 'path' },
+        },
+        formatting = {
+          format = function(entry, vim_item)
+            local lspkind_ok, lspkind = pcall(require, 'lspkind')
+            if not lspkind_ok then
+              -- From kind_icons array
+              vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind)
+              -- Source
+              vim_item.menu = ({
+                copilot = '[Copilot]',
+                nvim_lsp = '[LSP]',
+                nvim_lua = '[Lua]',
+                luasnip = '[LuaSnip]',
+                buffer = '[Buffer]',
+                latex_symbols = '[LaTeX]',
+              })[entry.source.name]
+              return vim_item
+            else
+              -- From lspkind
+              return lspkind.cmp_format()(entry, vim_item)
+            end
+          end,
         },
       }
     end,
@@ -815,7 +870,33 @@ require('lazy').setup {
 
       ---@diagnostic disable-next-line: missing-fields
       require('nvim-treesitter.configs').setup {
-        ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc' },
+        ensure_installed = {
+          'bash',
+          'c',
+          'html',
+          'javascript',
+          'json',
+          'lua',
+          'luadoc',
+          'luap',
+          'markdown',
+          'markdown_inline',
+          'python',
+          'query',
+          'regex',
+          'tsx',
+          'typescript',
+          'vim',
+          'vimdoc',
+          'yaml',
+          'rust',
+          'go',
+          'gomod',
+          'gowork',
+          'gosum',
+          'terraform',
+          'proto',
+        },
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true },
@@ -990,7 +1071,6 @@ require('lazy').setup {
       }
     end,
   },
-
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- put them in the right spots if you want.
