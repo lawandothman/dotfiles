@@ -1,3 +1,12 @@
+# Disable Oh My Zsh's automatic tab title setting
+DISABLE_AUTO_TITLE="true"
+
+
+# Set the tab title to the current directory
+function precmd {
+  print -Pn "\e]0;%~\a"
+}
+
 # Amazon Q pre block. Keep at the top of this file.
 [[ -f "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/amazon-q/shell/zshrc.pre.zsh"
 # Q pre block. Keep at the top of this file.
@@ -120,4 +129,3 @@ alias ls="eza"
 INSERT_MODE_INDICATOR="%F{yellow}+%f"
 bindkey -M viins 'jk' vi-cmd-mode
 bindkey -M viins 'jj' vi-cmd-mode
-
