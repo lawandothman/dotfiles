@@ -1,5 +1,4 @@
 --[[
-
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -109,6 +108,9 @@ vim.opt.mouse = 'a'
 
 -- Don't show the mode, since it's already in status line
 vim.opt.showmode = false
+
+-- Don't show the command keys in the bottom right corner
+vim.opt.showcmd = false
 
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
@@ -288,23 +290,6 @@ require('lazy').setup {
   -- Then, because we use the `config` key, the configuration only runs
   -- after the plugin has been loaded:
   --  config = function() ... end
-
-  {
-    'folke/which-key.nvim',
-    event = 'VimEnter',
-    config = function()
-      require('which-key').setup()
-
-      -- Updated keybinding registration with the latest spec
-      require('which-key').add {
-        { '<leader>c', group = '[C]ode' },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
-        { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-      }
-    end,
-  },
   {
     'github/copilot.vim',
   },
@@ -873,6 +858,13 @@ require('lazy').setup {
         ensure_installed = {
           'bash',
           'c',
+          'css',
+          'gleam',
+          'go',
+          'gomod',
+          'gosum',
+          'gowork',
+          'graphql',
           'html',
           'javascript',
           'json',
@@ -890,12 +882,10 @@ require('lazy').setup {
           'vimdoc',
           'yaml',
           'rust',
-          'go',
-          'gomod',
-          'gowork',
-          'gosum',
+          'toml',
           'terraform',
           'proto',
+          'yaml',
         },
         -- Autoinstall languages that are not installed
         auto_install = true,
@@ -1075,6 +1065,84 @@ require('lazy').setup {
     'windwp/nvim-autopairs',
     event = 'InsertEnter',
     config = true,
+  },
+  {
+    'numToStr/Comment.nvim',
+    opts = {},
+    lazy = false,
+  },
+  {
+    'joosepalviste/nvim-ts-context-commentstring',
+    lazy = true,
+  },
+  {
+    'stevearc/dressing.nvim',
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    opts = {},
+    config = function()
+      require('dressing').setup()
+    end,
+  },
+  {
+    'sindrets/diffview.nvim',
+    event = 'VeryLazy',
+    cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewToggleFiles', 'DiffviewFocusFiles' },
+  },
+  -- Git related plugins
+  'tpope/vim-fugitive',
+  'tpope/vim-rhubarb',
+
+  -- not git, but it's okay
+  {
+    'mbbill/undotree',
+    keys = {
+      {
+        '<leader>GU',
+        ':UndotreeToggle<CR>',
+        desc = 'Toggle UndoTree',
+      },
+    },
+  },
+  {
+    'nvim-lualine/lualine.nvim',
+    config = function()
+      require('lualine').setup {
+        options = {
+          theme = 'auto',
+          icons_enabled = true,
+          always_divide_middle = true,
+          globalstatus = true,
+          component_separators = '|',
+          section_separators = { left = '', right = '' },
+          disabled_filetypes = {
+            statusline = { 'dashboard', 'NvimTree', 'neo-tree' },
+          },
+          ignore_focus = { 'NvimTree', 'NeoTree', 'neo-tree' },
+          refresh = {
+            statusline = 1000,
+          },
+        },
+        sections = {
+          lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },
+          lualine_b = { { 'filename', file_status = false, path = 1 }, 'branch' },
+          lualine_c = { 'diff' },
+          lualine_x = { { 'diagnostics', sources = { 'nvim_diagnostic', 'coc' } } },
+          lualine_y = { 'filetype', '%p%%/%L' },
+          lualine_z = {
+            { 'location', separator = { right = '' }, left_padding = 2 },
+          },
+        },
+        inactive_sections = {},
+        tabline = {},
+        extensions = {
+          'nvim-tree',
+          'neo-tree',
+          'fugitive',
+          'toggleterm',
+        },
+      }
+      vim.opt.showmode = false
+    end,
   },
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
