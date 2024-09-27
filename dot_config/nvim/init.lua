@@ -803,10 +803,9 @@ require('lazy').setup {
       vim.cmd.colorscheme 'kanagawa'
 
       -- You can configure highlights by doing something like
-      vim.cmd.hi 'Comment gui=none'
+      -- vim.cmd.hi 'Comment gui=none'
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -965,6 +964,7 @@ require('lazy').setup {
   },
   {
     'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-tree/nvim-web-devicons',
@@ -972,7 +972,7 @@ require('lazy').setup {
     },
     event = 'VeryLazy',
     keys = {
-      { '<leader>e', ':Neotree toggle float<CR>', silent = true, desc = 'Float File Explorer' },
+      -- { '<leader>e', ':Neotree toggle float<CR>', silent = true, desc = 'Float File Explorer' },
       { '<leader><Tab>', ':Neotree toggle left<CR>', silent = true, desc = 'Left File Explorer' },
     },
     config = function()
@@ -992,12 +992,12 @@ require('lazy').setup {
             symbol = ' ',
             highlight = 'NeoTreeModified',
           },
-          icon = {
-            folder_closed = '',
-            folder_open = '',
-            folder_empty = '',
-            folder_empty_open = '',
-          },
+          -- icon = {
+          --   folder_closed = '',
+          --   folder_open = '',
+          --   folder_empty = '',
+          --   folder_empty_open = '',
+          -- },
           git_status = {
             symbols = {
               -- Change type
@@ -1025,6 +1025,7 @@ require('lazy').setup {
             hide_gitignored = false,
             hide_by_name = {
               'node_modules',
+              '.git',
             },
             never_show = {
               '.DS_Store',
