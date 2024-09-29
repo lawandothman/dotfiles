@@ -151,9 +151,12 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 8
 
 vim.opt.backup = false -- Creates a backup file
+vim.opt.swapfile = false
+vim.opt.updatetime = 50
+vim.opt.colorcolumn = '80'
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -168,9 +171,8 @@ vim.keymap.set('n', '<C-u>', '<C-u>zz', { noremap = true, silent = true })
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
--- Paste over currently selected text without yanking it
-vim.keymap.set('v', 'p', '"_dp')
-vim.keymap.set('v', 'P', '"_dP')
+vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set('x', '<leader>p', [["_dP]])
 
 -- Select all
 vim.keymap.set('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
