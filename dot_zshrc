@@ -123,7 +123,7 @@ alias gsp="git stash pop"
 alias t="tmux"
 alias cat="bat"
 alias grep="rg"
-alias ls="eza"
+alias ls="lsd"
 
 # Vim in zsh
 INSERT_MODE_INDICATOR="%F{yellow}+%f"
