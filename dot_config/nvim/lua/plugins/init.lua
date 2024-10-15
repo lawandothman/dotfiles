@@ -67,6 +67,11 @@ require('lazy').setup {
         changedelete = { text = '~' },
       },
     },
+    config = function()
+      require('gitsigns').setup()
+
+      vim.keymap.set('n', '<leader>gt', ':Gitsigns toggle_current_line_blame<CR>', {})
+    end,
   },
 
   -- Highlight todo, notes, etc in comments
@@ -91,8 +96,13 @@ require('lazy').setup {
     'rebelot/kanagawa.nvim',
     lazy = false, -- make sure we load this during startup if it is your main colorscheme
     priority = 1000, -- make sure to load this before all the other start plugins
+    opts = {
+      theme = 'dragon',
+      background = {
+        dark = 'dragon',
+      },
+    },
     config = function()
-      -- Load the colorscheme here
       vim.cmd.colorscheme 'kanagawa'
 
       -- You can configure highlights by doing something like

@@ -129,6 +129,14 @@ return {
     local servers = {
       -- clangd = {},
       gopls = {},
+      jsonls = {
+        settings = {
+          json = {
+            format = { enable = false },
+          },
+        },
+      },
+      yamlls = {},
       -- pyright = {},
       rust_analyzer = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
