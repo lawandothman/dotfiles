@@ -198,7 +198,7 @@ require('lazy').setup {
     'mbbill/undotree',
     keys = {
       {
-        '<leader>GU',
+        '<leader>gu',
         ':UndotreeToggle<CR>',
         desc = 'Toggle UndoTree',
       },
