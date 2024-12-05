@@ -37,6 +37,11 @@ require('lazy').setup {
   -- Telescope
   { import = 'plugins.telescope' },
 
+  -- DAP (Debug Adapter Protocol)
+  { import = 'plugins.dap' },
+
+  { import = 'plugins.telescope' },
+
   -- LSP and Autocompletion
   { import = 'plugins.lsp' },
   { import = 'plugins.cmp' },
@@ -52,6 +57,12 @@ require('lazy').setup {
 
   -- Lua Line (Status Line)
   { import = 'plugins.lualine' },
+
+  -- Colorscheme
+  { import = 'plugins.colorscheme' },
+
+  -- Formatting
+  { import = 'plugins.conform' },
 
   -- Git
   { 'tpope/vim-fugitive' },
@@ -83,50 +94,6 @@ require('lazy').setup {
     },
     opts = {
       signs = false,
-    },
-  },
-
-  -- Theme
-  {
-    -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    'rebelot/kanagawa.nvim',
-    lazy = false, -- make sure we load this during startup if it is your main colorscheme
-    priority = 1000, -- make sure to load this before all the other start plugins
-    opts = {
-      theme = 'dragon',
-      background = {
-        dark = 'dragon',
-      },
-    },
-    config = function()
-      vim.cmd.colorscheme 'kanagawa'
-
-      -- You can configure highlights by doing something like
-      -- vim.cmd.hi 'Comment gui=none'
-    end,
-  },
-
-  { -- Autoformat
-    'stevearc/conform.nvim',
-    opts = {
-      notify_on_error = false,
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
-      },
     },
   },
 
@@ -203,5 +170,77 @@ require('lazy').setup {
         desc = 'Toggle UndoTree',
       },
     },
+  },
+  {
+    'pmizio/typescript-tools.nvim',
+    event = 'BufReadPre',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    opts = {},
+    config = function()
+      require('typescript-tools').setup {
+        settings = {
+          separate_diagnostic_server = true,
+          expose_as_code_action = 'all',
+          -- tsserver_plugins = {},
+          tsserver_max_memory = 'auto',
+          complete_function_calls = true,
+          include_completions_with_insert_text = true,
+          tsserver_file_preferences = {
+            includeInlayParameterNameHints = 'all', -- "none" | "literals" | "all";
+            includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+            includeInlayFunctionParameterTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayFunctionLikeReturnTypeHints = true,
+            includeInlayEnumMemberValueHints = true,
+            includeCompletionsForModuleExports = true,
+            quotePreference = 'auto',
+            -- autoImportFileExcludePatterns = { "node_modules/*", ".git/*" },
+          },
+          tsserver_path = './node_modules/typescript/lib/tsserver.js',
+        },
+      }
+    end,
+  },
+  {
+    'luckasRanarison/tailwind-tools.nvim',
+    name = 'tailwind-tools',
+    build = ':UpdateRemotePlugins',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-telescope/telescope.nvim',
+      'neovim/nvim-lspconfig',
+    },
+    opts = {
+      server = {
+        override = true,
+      },
+      document_color = {
+        enabled = true,
+        kind = 'inline',
+      },
+      conceal = {
+        enabled = true,
+        min_length = 69,
+        symbol = '󱏿',
+      },
+      cmp = {
+        highlight = 'foreground',
+      },
+      extension = {
+        patterns = {
+          javascript = { 'clsx%(([^)]+)%)' },
+        },
+      },
+    },
+    config = function(_, opts)
+      require('tailwind-tools').setup(opts)
+    end,
+  },
+  {
+    'neoclide/coc.nvim',
+    branch = 'release',
+    ft = 'prisma',
   },
 }
