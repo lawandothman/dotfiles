@@ -129,6 +129,20 @@ return {
     local servers = {
       -- clangd = {},
       gopls = {},
+      intelephense = {
+        settings = {
+          init_options = {
+            license_key = '00UCZA8AHRP7VQG',
+          },
+          settings = {
+            intelephense = {
+              files = {
+                maxSize = 100000, -- Increase max file size limit for indexing
+              },
+            },
+          },
+        },
+      },
       jsonls = {
         settings = {
           json = {
@@ -137,15 +151,27 @@ return {
         },
       },
       yamlls = {},
+      biome = {},
+      prismals = {},
       -- pyright = {},
-      rust_analyzer = {},
+      rust_analyzer = {
+        settings = {
+          ['rust-analyzer'] = {
+            checkOnSave = {
+              command = 'clippy',
+            },
+          },
+        },
+      },
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
       --
       -- Some languages (like typescript) have entire language plugins that can be useful:
       --    https://github.com/pmizio/typescript-tools.nvim
       --
-      -- But for many setups, the LSP (`tsserver`) will work just fine
-      ts_ls = {},
+      -- -- But for many setups, the LSP (`tsserver`) will work just fine
+      -- ts_ls = {
+      --   tsdk = 'node_modules/typescript/lib', -- Set the path to your TypeScript SDK
+      -- },
       eslint = {
         on_attach = function(_, bufnr)
           vim.api.nvim_create_autocmd('BufWritePre', {
