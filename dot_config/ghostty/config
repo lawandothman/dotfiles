@@ -1,0 +1,18 @@
+theme = rose-pine
+background = 1A1B26
+cursor-color = B62EB2
+
+font-family = "Symbols Nerd Font Mono"
+font-family = "JetBrains Mono"
+font-size = 13
+font-feature = -liga
+font-feature = -calt
+font-feature = -dlig
+
+macos-titlebar-style = tabs
+title = " "
+
+mouse-hide-while-typing = true
+
+window-save-state = always
+window-padding-balance = true

@@ -1,0 +1,36 @@
+[user]
+	name = Lawand Othman
+	email = lwnd@pm.me
+[core]
+	editor = nvim
+	excludesFile = /Users/Lawand/.gitignore_global
+[pull]
+	rebase = true
+	ff = only
+	autoStash = true
+[merge]
+	tool = diffview
+[mergetool "diffview"]
+	cmd = nvim -c \"DiffviewOpen\"
+[mergetool]
+	prompt = false
+[branch]
+	autosetuprebase = always
+[alias]
+	rh = reset --hard HEAD
+	b = checkout -b
+	co = checkout
+	unstage = reset --soft HEAD
+[color]
+	ui = true
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold 
+	newHighlight = green bold 22
+[init]
+	defaultBranch = main
+[push]
+	autoSetupRemote = true
+[rerere]
+	enabled = true
