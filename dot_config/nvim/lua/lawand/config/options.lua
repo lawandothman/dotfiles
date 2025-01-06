@@ -2,6 +2,12 @@
 -- `:help vim.opt`
 --  For more options, you can see `:help option-list`
 
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
+
+vim.g.loaded_netrw = 1 -- Disable netrw
+vim.g.loaded_netrwPlugin = 1 -- Disable netrw
+
 -- Line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
