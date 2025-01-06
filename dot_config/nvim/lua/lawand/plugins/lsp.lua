@@ -6,6 +6,7 @@ return {
     'WhoIsSethDaniel/mason-tool-installer.nvim',
     { 'j-hui/fidget.nvim', opts = {} },
   },
+
   config = function()
     -- Brief Aside: **What is LSP?**
     --

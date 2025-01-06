@@ -53,6 +53,18 @@ return {
       },
     }
     vim.cmd.colorscheme 'rose-pine'
-    vim.api.nvim_set_hl(0, 'Normal', { bg = '#1A1B26' })
+    local bg = '#1A1B26'
+    local groups = {
+      'Normal',
+      'NormalNC', -- Non-current windows
+      'NormalFloat', -- Floating windows
+      'NormalSB', -- Sidebar windows
+      'SignColumn',
+      'EndOfBuffer',
+    }
+
+    for _, group in ipairs(groups) do
+      vim.api.nvim_set_hl(0, group, { bg = bg })
+    end
   end,
 }
