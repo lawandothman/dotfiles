@@ -5,7 +5,9 @@ return {
     float = {
       max_width = 150,
     },
-    view_options = {},
+    view_options = {
+      show_hidden = true,
+    },
   },
   dependencies = { { 'echasnovski/mini.icons', opts = {} } },
 }

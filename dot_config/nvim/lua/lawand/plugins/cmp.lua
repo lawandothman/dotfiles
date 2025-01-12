@@ -6,6 +6,7 @@ return {
     'hrsh7th/cmp-path',
     'tailwind-tools',
     'onsails/lspkind-nvim',
+    'kristijanhusak/vim-dadbod-completion',
   },
   config = function()
     local cmp = require 'cmp'
@@ -61,6 +62,7 @@ return {
         { name = 'nvim_lua' },
         { name = 'buffer' },
         { name = 'path' },
+        { name = 'vim-dadbod-completion' },
       },
       formatting = {
         format = lspkind.cmp_format {
