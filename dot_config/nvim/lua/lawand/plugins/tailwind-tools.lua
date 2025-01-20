@@ -13,7 +13,7 @@ return {
     },
     document_color = {
       enabled = true,
-      kind = 'inlie',
+      kind = 'inline',
     },
     cmp = {
       highlight = 'foreground',
