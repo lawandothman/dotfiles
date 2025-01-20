@@ -53,7 +53,7 @@ return {
       },
     }
     vim.cmd.colorscheme 'rose-pine'
-    local bg = '#1A1B26'
+    local bg = '#18181B'
     local groups = {
       'Normal',
       'NormalNC', -- Non-current windows
