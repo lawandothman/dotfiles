@@ -53,10 +53,8 @@ return {
       typescriptreact = biome_lsp_or_prettier,
       json = { 'biome-check', 'biome' },
       jsonc = { 'biome-check', 'biome' },
-      blade = { 'blade-formatter' },
       rust = { 'rustfmt' },
       lua = { 'stylua' },
-      php = { 'pint' },
     },
   },
 }
