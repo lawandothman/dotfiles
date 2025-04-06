@@ -1,19 +1,15 @@
 [user]
 	name = Lawand Othman
 	email = lwnd@pm.me
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO1elTbv1umuOB/fiyfBH5Mcy6DuxvT9iobpytQghe9V lwnd@pm.me
 [core]
 	editor = nvim
 	excludesFile = /Users/Lawand/.gitignore_global
 [pull]
 	rebase = true
-	ff = only
 	autoStash = true
 [merge]
 	tool = diffview
-[mergetool "diffview"]
-	cmd = nvim -c \"DiffviewOpen\"
-[mergetool]
-	prompt = false
 [branch]
 	autosetuprebase = always
 [alias]
@@ -34,3 +30,7 @@
 	autoSetupRemote = true
 [rerere]
 	enabled = true
+[commit]
+	gpgsign = true
+[gpg]
+	format = ssh
