@@ -12,6 +12,11 @@ return {
         tsserver_max_memory = 'auto',
         complete_function_calls = true,
         include_completions_with_insert_text = true,
+        publish_diagnostic_on = 'insert_leave',
+        tsserver_format_options = {
+          allowIncompleteCompletions = false,
+          allowRenameOfImportPath = false,
+        },
         tsserver_file_preferences = {
           includeInlayParameterNameHints = 'all', -- "none" | "literals" | "all";
           includeInlayParameterNameHintsWhenArgumentMatchesName = true,

@@ -54,6 +54,9 @@ return {
         --  This is where a variable was first declared, or where a function is defined, etc.
         --  To jump back, press <C-T>.
         map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+        map('<leader>gd', function()
+          require('telescope.builtin').lsp_definitions { jump_type = 'vsplit' }
+        end, '[G]oto [D]efinition in vertical split')
 
         -- Find references for the word under your cursor.
         map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
@@ -130,20 +133,6 @@ return {
     local servers = {
       -- clangd = {},
       gopls = {},
-      intelephense = {
-        settings = {
-          init_options = {
-            license_key = os.getenv 'INTELEPHENSE_LICENSE_KEY',
-          },
-          settings = {
-            intelephense = {
-              files = {
-                maxSize = 100000, -- Increase max file size limit for indexing
-              },
-            },
-          },
-        },
-      },
       jsonls = {
         settings = {
           json = {

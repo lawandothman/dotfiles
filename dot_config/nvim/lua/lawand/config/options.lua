@@ -26,7 +26,20 @@ vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
-vim.opt.conceallevel = 0 -- don't hide my json strings
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' },
+  callback = function()
+    vim.opt_local.conceallevel = 2
+  end,
+})
+
+-- Keep JSON files unconcealed
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'json',
+  callback = function()
+    vim.opt_local.conceallevel = 0
+  end,
+})
 
 -- Search
 --

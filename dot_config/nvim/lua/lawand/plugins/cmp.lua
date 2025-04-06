@@ -60,7 +60,6 @@ return {
         { name = 'copilot' },
         { name = 'nvim_lsp' },
         { name = 'nvim_lua' },
-        { name = 'buffer' },
         { name = 'path' },
         { name = 'vim-dadbod-completion' },
       },

@@ -41,9 +41,9 @@ return {
       },
     },
   },
-  {
-    'neoclide/coc.nvim',
-    branch = 'release',
-    ft = 'prisma',
-  },
+  -- {
+  --   'neoclide/coc.nvim',
+  --   branch = 'release',
+  --   ft = 'prisma',
+  -- },
 }

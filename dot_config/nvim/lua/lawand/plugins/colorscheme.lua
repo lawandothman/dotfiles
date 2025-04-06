@@ -3,6 +3,7 @@ return {
   lazy = false, -- make sure we load this during startup if it is your main colorscheme
   priority = 1000, -- make sure to load this before all the other start plugins
   config = function()
+    local bg = '#0D1017'
     require('rose-pine').setup {
       variant = 'main', -- auto, main, moon, or dawn
       dark_variant = 'main', -- main, moon, or dawn
@@ -51,9 +52,15 @@ return {
         h5 = 'pine',
         h6 = 'foam',
       },
+
+      highlight_groups = {
+        TelescopePromptBorder = { bg = bg, fg = '#1F2329' },
+        TelescopeResultsBorder = { bg = bg, fg = '#1F2329' },
+        TelescopePreviewBorder = { bg = bg, fg = '#1F2329' },
+      },
     }
     vim.cmd.colorscheme 'rose-pine'
-    local bg = '#18181B'
+
     local groups = {
       'Normal',
       'NormalNC', -- Non-current windows
