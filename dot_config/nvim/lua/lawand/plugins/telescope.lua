@@ -1,7 +1,7 @@
 return {
   'nvim-telescope/telescope.nvim',
   event = 'VimEnter',
-  branch = '0.1.x',
+  branch = 'master',
   dependencies = {
     'nvim-lua/plenary.nvim',
     {
@@ -17,6 +17,10 @@ return {
   config = function()
     require('telescope').setup {
       defaults = {
+        preview = {
+          treesitter = true,
+          timeout = 500,
+        },
         mappings = {
           n = {
             ['<C-x>'] = require('telescope.actions').delete_buffer,

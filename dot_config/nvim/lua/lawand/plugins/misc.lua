@@ -3,7 +3,7 @@ return {
   { 'tpope/vim-sleuth' },
 
   -- GitHub Copilot
-  { 'github/copilot.vim' },
+  -- { 'github/copilot.vim',  },
 
   {
     'kylechui/nvim-surround',

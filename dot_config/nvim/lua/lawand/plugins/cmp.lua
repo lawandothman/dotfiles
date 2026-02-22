@@ -4,14 +4,12 @@ return {
   dependencies = {
     'hrsh7th/cmp-nvim-lsp',
     'hrsh7th/cmp-path',
-    'tailwind-tools',
     'onsails/lspkind-nvim',
     'kristijanhusak/vim-dadbod-completion',
   },
   config = function()
     local cmp = require 'cmp'
     local lspkind = require 'lspkind'
-    local tailwind_tools = require 'tailwind-tools.cmp'
 
     local kind_icons = {
       Text = '',
@@ -57,7 +55,6 @@ return {
         documentation = cmp.config.window.bordered(),
       },
       sources = {
-        { name = 'copilot' },
         { name = 'nvim_lsp' },
         { name = 'nvim_lua' },
         { name = 'path' },
@@ -67,7 +64,6 @@ return {
         format = lspkind.cmp_format {
           mode = 'symbol_text',
           maxwidth = 50,
-          before = tailwind_tools.lspkind_format, -- Integration with Tailwind highlighting
           symbol_map = kind_icons,
         },
       },

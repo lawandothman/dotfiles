@@ -1,6 +1,6 @@
 return {
     'goolord/alpha-nvim',
-    enable = true,
+    enabled = true,
     event = 'VimEnter',
     lazy = true,
     opts = function()
@@ -19,7 +19,7 @@ return {
         dashboard.section.buttons.val = {
             dashboard.button('f', ' ' .. ' Find file', ':Telescope find_files <CR>'),
             dashboard.button('r', ' ' .. ' Recent files', ':Telescope oldfiles <CR>'),
-            dashboard.button('s', ' ' .. ' Restore Session', '<cmd>lua require("persistence").load()<cr>'),
+            dashboard.button('g', ' ' .. ' Live Grep', ':Telescope live_grep <CR>'),
             dashboard.button('c', ' ' .. ' Config', ':e ~/.config/nvim/ <CR>'),
             dashboard.button('q', ' ' .. ' Quit', ':qa<CR>'),
         }
