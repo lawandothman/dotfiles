@@ -34,3 +34,6 @@
 	gpgsign = true
 [gpg]
 	format = ssh
+[url "ssh://git@github.com/lottiehq"]
+	insteadOf = https://github.com/lottiehq/*
+	

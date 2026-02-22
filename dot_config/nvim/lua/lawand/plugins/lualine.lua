@@ -10,9 +10,8 @@ return {
         component_separators = '|',
         section_separators = { left = '', right = '' },
         disabled_filetypes = {
-          statusline = { 'dashboard', 'NvimTree', 'neo-tree' },
+          statusline = { 'dashboard' },
         },
-        ignore_focus = { 'NvimTree', 'NeoTree', 'neo-tree' },
         refresh = {
           statusline = 1000,
         },
@@ -21,7 +20,7 @@ return {
         lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },
         lualine_b = { { 'filename', file_status = false, path = 1 }, 'branch' },
         lualine_c = { 'diff' },
-        lualine_x = { { 'copilot', 'diagnostics', sources = { 'nvim_diagnostic', 'coc' } } },
+        lualine_x = { { 'diagnostics', sources = { 'nvim_diagnostic' } } },
         lualine_y = { 'filetype', '%p%%/%L' },
         lualine_z = {
           { 'location', separator = { right = '' }, left_padding = 2 },
@@ -30,12 +29,9 @@ return {
       inactive_sections = {},
       tabline = {},
       extensions = {
-        'nvim-tree',
-        'neo-tree',
         'fugitive',
-        'toggleterm',
+        'trouble',
       },
     }
-    vim.opt.showmode = false
   end,
 }

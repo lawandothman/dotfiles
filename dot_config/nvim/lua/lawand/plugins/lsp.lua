@@ -133,6 +133,7 @@ return {
     local servers = {
       -- clangd = {},
       gopls = {},
+      terraformls = {},
       jsonls = {
         settings = {
           json = {
@@ -143,6 +144,7 @@ return {
       yamlls = {},
       biome = {},
       prismals = {},
+      -- tailwindcss configured separately below
       -- pyright = {},
       rust_analyzer = {
         settings = {
@@ -228,5 +230,40 @@ return {
         end,
       },
     }
+
+    -- Tailwind CSS v4 requires explicit config file path
+    vim.lsp.config('tailwindcss', {
+      root_dir = function(bufnr, on_dir)
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        local root = vim.fs.root(fname, { 'pnpm-workspace.yaml', 'package.json' })
+        if root then
+          on_dir(root)
+        end
+      end,
+      settings = {
+        tailwindCSS = {
+          experimental = {
+            configFile = 'packages/design-system/src/globals.css',
+            classRegex = {
+              { 'cva\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+              { 'cx\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+              { 'cn\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+              { 'clsx\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+              { 'twMerge\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+            },
+          },
+          lint = {
+            cssConflict = 'warning',
+            invalidApply = 'error',
+            invalidScreen = 'error',
+            invalidVariant = 'error',
+            invalidConfigPath = 'error',
+            invalidTailwindDirective = 'error',
+            recommendedVariantOrder = 'warning',
+          },
+        },
+      },
+    })
+    vim.lsp.enable 'tailwindcss'
   end,
 }

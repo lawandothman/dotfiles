@@ -12,8 +12,8 @@ return {
         changedelete = { text = '~' },
       },
     },
-    config = function()
-      require('gitsigns').setup()
+    config = function(_, opts)
+      require('gitsigns').setup(opts)
 
       vim.keymap.set('n', '<leader>gt', ':Gitsigns toggle_current_line_blame<CR>', {})
     end,

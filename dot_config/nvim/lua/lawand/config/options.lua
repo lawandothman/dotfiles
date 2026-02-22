@@ -26,21 +26,6 @@ vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' },
-  callback = function()
-    vim.opt_local.conceallevel = 2
-  end,
-})
-
--- Keep JSON files unconcealed
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = 'json',
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
-})
-
 -- Search
 --
 -- Case-insensitive searching UNLESS \C or capital in search
@@ -57,8 +42,10 @@ vim.opt.splitbelow = true
 vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 8
+vim.opt.scrolljump = 8
 vim.opt.signcolumn = 'yes'
 vim.opt.updatetime = 50
+vim.o.autoread = true
 vim.opt.timeoutlen = 300
 vim.opt.completeopt = 'menuone,noselect'
 vim.opt.termguicolors = true
@@ -79,27 +66,16 @@ vim.opt.undofile = true
 --  See `:help 'list'`
 --  and `:help 'listchars'`
 vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = { tab = '  ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
-
--- Show which line your cursor is on
-vim.opt.cursorline = true
 
 vim.opt.backup = false -- Creates a backup file
 vim.opt.swapfile = false
 vim.opt.colorcolumn = '80'
 
 vim.opt.fillchars = { eob = ' ' }
-
-vim.api.nvim_create_autocmd('TermOpen', {
-  group = vim.api.nvim_create_augroup('custom-term-open', { clear = true }),
-  callback = function()
-    vim.opt.number = false
-    vim.opt.relativenumber = false
-  end,
-})
 
 if vim.fn.getenv 'TERM_PROGRAM' == 'ghostty' then
   vim.opt.title = true
