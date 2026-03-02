@@ -1,0 +1,58 @@
+export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+source "$HOME/.local/share/secrets/env.sh"
+export EDITOR='nvim'
+
+# Path to your oh-my-zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+ZSH_THEME="vercel"
+
+plugins=(git vi-mode)
+
+source $ZSH/oh-my-zsh.sh
+
+purgit() {
+  # Fetch the latest from remote to sync refs
+  git fetch --prune
+
+  # Delete local branches that are fully merged to main/master
+  echo "⏳ Deleting merged branches..."
+  git branch --merged | grep -v "\*" | grep -v "main" | grep -v "master" | xargs -r git branch -d
+
+  # Find branches where the remote tracking branch no longer exists
+  echo "⏳ Checking for branches with deleted remotes..."
+  for branch in $(git branch -vv | grep ': gone]' | awk '{print $1}'); do
+    echo "Deleting $branch (remote reference is gone)"
+    git branch -D $branch
+  done
+  
+  echo "✅ Purge complete"
+}
+
+alias vim="nvim"
+alias zshconfig="nvim ~/.zshrc"
+alias k=kubectl
+alias kp="kubectl config use-context production"
+alias ks="kubectl config use-context staging"
+alias gclean="git clean -Xdf -e \"!.env\""
+alias gs="git stash"
+alias gsp="git stash pop"
+alias t="tmux"
+alias cat="bat"
+alias grep="rg"
+alias ls="lsd"
+alias gsync="git fetch origin main:main && git rebase --autostash main"
+
+# Vim in zsh
+INSERT_MODE_INDICATOR="%F{yellow}+%f"
+bindkey -M viins 'jk' vi-cmd-mode
+bindkey -M viins 'jj' vi-cmd-mode
+
+eval "$(~/.local/bin/mise activate zsh)"
+
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+
+source <(kubectl completion zsh)
+
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
