@@ -4,14 +4,22 @@
 	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO1elTbv1umuOB/fiyfBH5Mcy6DuxvT9iobpytQghe9V lwnd@pm.me
 [core]
 	editor = nvim
-	excludesFile = /Users/Lawand/.gitignore_global
+	excludesFile = ~/.gitignore_global
 [pull]
 	rebase = true
 	autoStash = true
 [merge]
 	tool = diffview
+[diff]
+	algorithm = histogram
+[rebase]
+	autoSquash = true
+	updateRefs = true
+[column]
+	ui = auto
 [branch]
 	autosetuprebase = always
+	sort = -committerdate
 [alias]
 	rh = reset --hard HEAD
 	b = checkout -b
@@ -26,6 +34,8 @@
 	newHighlight = green bold 22
 [init]
 	defaultBranch = main
+[fetch]
+	prune = true
 [push]
 	autoSetupRemote = true
 [rerere]

@@ -144,6 +144,7 @@ return {
       yamlls = {},
       biome = {},
       prismals = {},
+      taplo = {},
       -- tailwindcss configured separately below
       -- pyright = {},
       rust_analyzer = {
