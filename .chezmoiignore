@@ -1,0 +1,4 @@
+# Files that live in the source repo (and on GitHub) but should NOT be
+# applied to the home directory by `chezmoi apply`.
+Brewfile
+README.md

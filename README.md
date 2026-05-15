@@ -42,9 +42,9 @@ A snapshot of every installed formula, cask, and tap lives in
 brew bundle install --file=~/.local/share/chezmoi/Brewfile
 ```
 
-The `cargo "..."` / `go "..."` lines come from a brew-bundle extension; they
-may warn on a vanilla `brew bundle install` and can be installed by hand if
-needed.
+The `cargo "..."` line comes from a brew-bundle extension; vanilla
+`brew bundle install` may warn on it and you can install with
+`cargo install tmux-sessionizer` instead.
 
 After updating tools on the running machine, refresh the snapshot:
 
