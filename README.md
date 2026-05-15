@@ -35,16 +35,27 @@ That places everything tracked in this repo (`~/.config/nvim`, `~/.config/ghostt
 
 ### 3. Tools used by the configs
 
-```sh
-brew install \
-  neovim          `# 0.12+ required for the native LSP setup` \
-  ghostty         `# terminal` \
-  tmux \
-  llvm            `# provides lldb-vscode used by nvim-dap (rust)` \
-  bat ripgrep lsd `# aliased in .zshrc as cat / grep / ls` \
-  fzf \
-  node            `# needed for tsgo + several LSP servers Mason installs`
+A snapshot of every installed formula, cask, and tap lives in
+[`Brewfile`](./Brewfile). Restore everything in one shot:
 
+```sh
+brew bundle install --file=~/.local/share/chezmoi/Brewfile
+```
+
+The `cargo "..."` / `go "..."` lines come from a brew-bundle extension; they
+may warn on a vanilla `brew bundle install` and can be installed by hand if
+needed.
+
+After updating tools on the running machine, refresh the snapshot:
+
+```sh
+brew bundle dump --force --file=~/.local/share/chezmoi/Brewfile
+```
+
+Then `chezmoi cd`, **review the diff** (this repo is public — strip anything
+work-specific or private before committing), and commit.
+
+```sh
 # oh-my-zsh + "vercel" theme (referenced in .zshrc)
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 # vercel theme: https://github.com/vercel-community/vercel-zsh
