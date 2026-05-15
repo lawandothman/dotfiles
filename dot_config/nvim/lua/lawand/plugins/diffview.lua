@@ -31,9 +31,6 @@ return {
         diff_buf_win_enter = function(bufnr)
           vim.opt_local.foldenable = false
         end,
-
-        -- TODO: jump to first diff: https://github.com/sindrets/diffview.nvim/issues/440
-        -- TODO: enable diagnostics in diffview
       },
     },
 

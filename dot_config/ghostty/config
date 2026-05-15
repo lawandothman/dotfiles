@@ -22,3 +22,5 @@ window-save-state = always
 window-padding-balance = true
 
 quit-after-last-window-closed = true
+
+custom-shader = shaders/cursor-trail.glsl

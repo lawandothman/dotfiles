@@ -2,6 +2,7 @@ export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 source "$HOME/.local/share/secrets/env.sh"
 export EDITOR='nvim'
+export HUSKY=0
 
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
@@ -42,7 +43,8 @@ alias t="tmux"
 alias cat="bat"
 alias grep="rg"
 alias ls="lsd"
-alias gsync="git fetch origin main:main && git rebase --autostash main"
+alias gsync="git fetch origin +main:main && git rebase --autostash main"
+alias c="claude --dangerously-skip-permissions"
 
 # Vim in zsh
 INSERT_MODE_INDICATOR="%F{yellow}+%f"

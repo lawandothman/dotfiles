@@ -1,33 +1,32 @@
 return {
   'nvim-treesitter/nvim-treesitter',
-  branch = 'master',
+  branch = 'main',
   lazy = false,
   build = ':TSUpdate',
   config = function()
-    ---@diagnostic disable-next-line: missing-fields
-    require('nvim-treesitter.configs').setup {
-      ensure_installed = {
-        'html',
-        'javascript',
-        'json',
-        'lua',
-        'markdown',
-        'markdown_inline',
-        'tsx',
-        'hcl',
-        'typescript',
-        'rust',
-        'toml',
-        'terraform',
-        'prisma',
-        'yaml',
-      },
-      highlight = {
-        enable = true,
-      },
-      indent = {
-        enable = true,
-      },
+    require('nvim-treesitter').setup {}
+
+    require('nvim-treesitter').install {
+      'html',
+      'javascript',
+      'json',
+      'lua',
+      'markdown',
+      'markdown_inline',
+      'tsx',
+      'hcl',
+      'typescript',
+      'rust',
+      'toml',
+      'terraform',
+      'prisma',
+      'yaml',
     }
+
+    vim.api.nvim_create_autocmd('FileType', {
+      callback = function()
+        pcall(vim.treesitter.start)
+      end,
+    })
   end,
 }

@@ -6,7 +6,7 @@ return {
     'theHamsta/nvim-dap-virtual-text',
     'nvim-telescope/telescope-dap.nvim',
     'nvim-neotest/nvim-nio',
-    'williamboman/mason.nvim',
+    'mason-org/mason.nvim',
     'jay-babu/mason-nvim-dap.nvim',
   },
   keys = function(_, keys)
