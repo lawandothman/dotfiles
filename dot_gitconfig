@@ -47,3 +47,9 @@
 [url "ssh://git@github.com/lottiehq"]
 	insteadOf = https://github.com/lottiehq/*
 	
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential

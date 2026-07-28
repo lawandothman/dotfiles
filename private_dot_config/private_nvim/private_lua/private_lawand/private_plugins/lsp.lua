@@ -38,6 +38,14 @@ return {
       capabilities = capabilities,
     })
 
+    -- TypeScript 7 native LSP: `tsc --lsp --stdio` from a global
+    -- `npm install -g typescript` (typescript >= 7; the tsgo binary is gone in
+    -- stable). Overrides the cmd function in nvim-lspconfig's bundled
+    -- lsp/tsgo.lua, which still spawns the old `tsgo` binary.
+    vim.lsp.config('tsgo', {
+      cmd = { 'tsc', '--lsp', '--stdio' },
+    })
+
     require('mason').setup()
 
     -- Mason installs the LSP binaries plus formatters/linters.
@@ -54,13 +62,11 @@ return {
       automatic_enable = false,
     }
 
-    -- Start each server. Neovim loads ~/.config/nvim/lsp/<name>.lua
-    -- automatically for any server that has one.
-    vim.lsp.enable(servers)
-
-    -- tsgo is installed outside Mason (npm: @typescript/native-preview); its
-    -- definition lives in ~/.config/nvim/lsp/tsgo.lua.
-    vim.lsp.enable 'tsgo'
+    -- Start each server, plus tsgo (the TypeScript 7 native LSP). tsgo stays
+    -- out of the Mason list because Mason's registry still ships the
+    -- superseded @typescript/native-preview build; the binary comes from a
+    -- global `npm install -g typescript` instead.
+    vim.lsp.enable(vim.list_extend({ 'tsgo' }, servers))
 
     vim.diagnostic.config {
       severity_sort = true,
