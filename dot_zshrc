@@ -34,8 +34,6 @@ purgit() {
 alias vim="nvim"
 alias zshconfig="nvim ~/.zshrc"
 alias k=kubectl
-alias kprd="kubectl config use-context production"
-alias kstg="kubectl config use-context staging"
 alias gclean="git clean -Xdf -e \"!.env\""
 alias gs="git stash"
 alias gsp="git stash pop"
