@@ -544,7 +544,7 @@ position = "top-right"
 [ui.sound]
 # Play sounds when Agents change state in background workspaces.
 # Default: true.
-enabled = false
+# enabled = true
 
 # MP3 used for every notification sound. Relative paths resolve from this file.
 # Default: unset.
