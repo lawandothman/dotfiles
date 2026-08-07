@@ -5,9 +5,22 @@
 vim.keymap.set('i', 'jj', '<Esc>', { noremap = true, desc = 'Exit insert mode with jj' })
 vim.keymap.set('i', 'jk', '<Esc>', { noremap = true, desc = 'Exit insert mode with jk' })
 
--- Keep cursor centered when scrolling
+-- Keep the cursor centered on every large jump. Normal mode only: mapping these
+-- in operator-pending would turn `d}` into `d}zz`. The search keys use `zzzv`
+-- so a match inside a closed fold opens it instead of landing on the fold line.
 vim.keymap.set('n', '<C-d>', '<C-d>zz', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-u>', '<C-u>zz', { noremap = true, silent = true })
+vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Next search result (centered)' })
+vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Previous search result (centered)' })
+vim.keymap.set('n', '*', '*zzzv', { desc = 'Search word under cursor forward (centered)' })
+vim.keymap.set('n', '#', '#zzzv', { desc = 'Search word under cursor backward (centered)' })
+vim.keymap.set('n', 'gg', 'ggzz', { desc = 'Start of file (centered)' })
+vim.keymap.set('n', 'G', 'Gzz', { desc = 'End of file (centered)' })
+vim.keymap.set('n', '{', '{zz', { desc = 'Previous paragraph (centered)' })
+vim.keymap.set('n', '}', '}zz', { desc = 'Next paragraph (centered)' })
+vim.keymap.set('n', '%', '%zz', { desc = 'Matching bracket (centered)' })
+vim.keymap.set('n', '<C-o>', '<C-o>zz', { desc = 'Jump back (centered)' })
+vim.keymap.set('n', '<C-i>', '<C-i>zz', { desc = 'Jump forward (centered)' })
 
 -- Move selected line / block of text in visual mode
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
@@ -19,9 +32,20 @@ vim.keymap.set('x', '<leader>p', [["_dP]])
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
+-- Diagnostic keymaps. goto_prev/goto_next are deprecated and removed in 0.13;
+-- vim.diagnostic.jump replaces them but does not default `float` to true, so it
+-- is passed explicitly to keep the popup on arrival.
+local function diagnostic_jump(count)
+  return function()
+    vim.diagnostic.jump { count = count, float = true }
+    vim.cmd 'normal! zz'
+  end
+end
+
+vim.keymap.set('n', '[d', diagnostic_jump(-1), { desc = 'Go to previous [D]iagnostic message' })
+vim.keymap.set('n', ']d', diagnostic_jump(1), { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', ']q', '<cmd>cnext<CR>zz', { desc = 'Next [Q]uickfix item' })
+vim.keymap.set('n', '[q', '<cmd>cprevious<CR>zz', { desc = 'Previous [Q]uickfix item' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
