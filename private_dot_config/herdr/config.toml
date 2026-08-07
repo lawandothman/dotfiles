@@ -535,7 +535,7 @@ position = "top-right"
 # Clipboard popup position: top-left, top-center, top-right, bottom-left,
 # bottom-center, or bottom-right.
 # Default: "bottom-center".
-# position = "bottom-center"
+position = "top-right"
 
 # -----------------------------------------------------------------------------
 # Sound
