@@ -5,6 +5,8 @@
 [core]
 	editor = nvim
 	excludesFile = ~/.gitignore_global
+	fsmonitor = true
+	untrackedCache = true
 [pull]
 	rebase = true
 	autoStash = true
@@ -36,6 +38,7 @@
 	defaultBranch = main
 [fetch]
 	prune = true
+	writeCommitGraph = true
 [push]
 	autoSetupRemote = true
 [rerere]
