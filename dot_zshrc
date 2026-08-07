@@ -37,7 +37,6 @@ alias k=kubectl
 alias gclean="git clean -Xdf -e \"!.env\""
 alias gs="git stash"
 alias gsp="git stash pop"
-alias t="tmux"
 alias cat="bat"
 alias grep="rg"
 alias ls="lsd"

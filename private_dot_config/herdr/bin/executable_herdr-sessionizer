@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Repo picker for herdr — the replacement for `tms`, which cannot be used here
+# because it creates tmux sessions rather than herdr workspaces.
+#
+# Search root, exclusions and picker colours carried over from the old tms
+# config so the flow feels identical.
+set -euo pipefail
+
+ROOT="${HERDR_SESSIONIZER_ROOT:-$HOME/Developer}"
+
+selected=$(
+  fd --hidden --case-sensitive --type d --max-depth 10 \
+    --exclude node_modules --exclude .venv --exclude target \
+    --exclude dist --exclude build \
+    '^\.git$' "$ROOT" \
+    | sed 's|/\.git/*$||' \
+    | sort \
+    | fzf --prompt='repo > ' \
+      --delimiter=/ --with-nth=-2.. \
+      --color='fg+:#e1a345,hl:#e1a345,hl+:#e1a345,prompt:#e1a345,pointer:#e1a345,border:#444444,info:#888888'
+) || exit 0
+
+[ -n "$selected" ] || exit 0
+
+label=$(basename "$selected")
+
+# herdr labels a workspace with its directory basename, so matching on label
+# reproduces tms's "switch to it if it already exists" behaviour.
+existing=$(
+  herdr workspace list 2>/dev/null \
+    | jq -r --arg l "$label" '.result.workspaces[]? | select(.label == $l) | .workspace_id' \
+    | head -n1
+)
+
+if [ -n "$existing" ]; then
+  herdr workspace focus "$existing" >/dev/null
+else
+  herdr workspace create --cwd "$selected" --label "$label" --focus >/dev/null
+fi

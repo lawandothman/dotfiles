@@ -2,7 +2,7 @@
 
 Personal macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
-Tracks: `nvim`, `ghostty`, `tmux`, `zsh`, `git`.
+Tracks: `nvim`, `ghostty`, `herdr`, `zsh`, `git`.
 
 ## Restore on a fresh machine
 
@@ -31,7 +31,7 @@ chezmoi init --apply git@github.com:lawandothman/dotfiles.git
 ```
 
 That places everything tracked in this repo (`~/.config/nvim`, `~/.config/ghostty`,
-`~/.tmux.conf`, `~/.zshrc`, `~/.gitconfig`, ...) into `$HOME`.
+`~/.config/herdr`, `~/.zshrc`, `~/.gitconfig`, ...) into `$HOME`.
 
 ### 3. Tools used by the configs
 
@@ -42,9 +42,8 @@ A snapshot of every installed formula, cask, and tap lives in
 brew bundle install --file=~/.local/share/chezmoi/Brewfile
 ```
 
-The `cargo "..."` line comes from a brew-bundle extension; vanilla
-`brew bundle install` may warn on it and you can install with
-`cargo install tmux-sessionizer` instead.
+`~/.config/herdr/bin/herdr-sessionizer` is the repo picker bound to
+`prefix+o`. It needs `fd` and `fzf`, both in the Brewfile.
 
 After updating tools on the running machine, refresh the snapshot:
 
