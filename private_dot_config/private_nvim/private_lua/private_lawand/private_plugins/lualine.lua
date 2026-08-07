@@ -9,9 +9,6 @@ return {
         globalstatus = true,
         component_separators = '|',
         section_separators = { left = '', right = '' },
-        disabled_filetypes = {
-          statusline = { 'dashboard' },
-        },
         refresh = {
           statusline = 1000,
         },

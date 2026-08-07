@@ -2,9 +2,6 @@ return {
   -- Detect tabstop and shiftwidth automatically
   { 'tpope/vim-sleuth' },
 
-  -- GitHub Copilot
-  -- { 'github/copilot.vim',  },
-
   {
     'kylechui/nvim-surround',
     version = '*', -- Use for stability; omit to use `main` branch for the latest features
