@@ -26,11 +26,7 @@ return {
     }
 
     -- Shared client capabilities (extended by cmp-nvim-lsp).
-    local capabilities = vim.tbl_deep_extend(
-      'force',
-      vim.lsp.protocol.make_client_capabilities(),
-      require('cmp_nvim_lsp').default_capabilities()
-    )
+    local capabilities = vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('cmp_nvim_lsp').default_capabilities())
 
     -- Apply capabilities to every LSP client. Merges with any other `*`
     -- defaults (see config/autocommands.lua for the workspace-URI workaround).
@@ -52,6 +48,7 @@ return {
     require('mason-tool-installer').setup {
       ensure_installed = vim.list_extend(vim.deepcopy(servers), {
         'stylua', -- Lua formatter
+        'oxfmt', -- JS/TS formatter
       }),
     }
 
