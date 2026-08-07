@@ -4,7 +4,7 @@ return {
     'mason-org/mason.nvim',
     'mason-org/mason-lspconfig.nvim',
     'WhoIsSethDaniel/mason-tool-installer.nvim',
-    'hrsh7th/cmp-nvim-lsp',
+    'saghen/blink.cmp',
     { 'j-hui/fidget.nvim', opts = {} },
   },
 
@@ -25,8 +25,8 @@ return {
       'yamlls',
     }
 
-    -- Shared client capabilities (extended by cmp-nvim-lsp).
-    local capabilities = vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('cmp_nvim_lsp').default_capabilities())
+    -- Shared client capabilities (extended by blink.cmp).
+    local capabilities = require('blink.cmp').get_lsp_capabilities()
 
     -- Apply capabilities to every LSP client. Merges with any other `*`
     -- defaults (see config/autocommands.lua for the workspace-URI workaround).
