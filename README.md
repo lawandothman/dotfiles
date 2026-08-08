@@ -2,8 +2,6 @@
 
 Personal macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
-Tracks: `nvim`, `ghostty`, `herdr`, `fish`, `starship`, `git`.
-
 ## Restore on a fresh machine
 
 ### 1. Prerequisites
@@ -81,10 +79,12 @@ is not an error.
 
 ### 6. TypeScript native LSP (`tsgo`)
 
-Not installed by Mason — it's an npm package:
+Not installed by Mason, whose registry still ships the superseded
+`@typescript/native-preview` build. `lsp.lua` runs `tsc --lsp --stdio`, so the
+binary comes from a global TypeScript 7:
 
 ```sh
-npm i -g @typescript/native-preview
+npm install -g typescript
 ```
 
 ### 7. First Neovim launch
