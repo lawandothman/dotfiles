@@ -1,0 +1,6 @@
+[tools]
+bun = "latest"
+go = "latest"
+node = "24"
+pnpm = "latest"
+terraform = "1.10.5"

@@ -4,108 +4,63 @@ Personal macOS dotfiles, symlinked into `$HOME` with [GNU Stow](https://www.gnu.
 
 ## Restore on a fresh machine
 
-### 1. Prerequisites
+Only two things have to happen by hand, because nothing exists yet:
 
 ```sh
-# Xcode CLT (for git, compilers)
 xcode-select --install
-
-# Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+git clone https://github.com/lawandothman/dotfiles.git ~/.dotfiles
+~/.dotfiles/dot init
 ```
 
-Set up an SSH key and add it to GitHub (the repo uses `git@github.com:`):
+`dot init` runs every step below, in order. Each one checks before acting, so
+re-running it is safe.
 
-```sh
-ssh-keygen -t ed25519 -C "lwnd@pm.me"
-# add ~/.ssh/id_ed25519.pub to https://github.com/settings/keys
-```
+| Step | Does |
+|---|---|
+| Homebrew | installs it if missing |
+| Brewfile | `brew bundle` — formulae, casks, fonts |
+| Stow dotfiles | symlinks `home/` into `$HOME` |
+| mise tools | `mise install` — node, bun, pnpm, go, terraform |
+| TypeScript LSP | global `typescript` 7, which nvim runs as `tsc --lsp` |
+| fish login shell | adds fish to `/etc/shells`, then `chsh` |
+| SSH key | ed25519, and prints where to paste the public half |
 
-### 2. Clone and stow
+Skip the interactive steps with `--skip-ssh` and `--skip-shell`.
 
-```sh
-git clone git@github.com:lawandothman/dotfiles.git ~/.dotfiles
-brew install stow
-stow -R -d ~/.dotfiles -t ~ home
-```
+`dot doctor` reports what is present and what is missing without changing
+anything.
 
-Stow refuses to overwrite existing real files. If it reports a conflict, move
-the offending file aside and re-run.
+### Two things `dot` cannot do
 
-### 3. Tools used by the configs
-
-A snapshot of every installed formula, cask, and tap lives in
-[`Brewfile`](./Brewfile). Restore everything in one shot:
-
-```sh
-brew bundle install --file=~/.dotfiles/Brewfile
-```
-
-`~/.config/herdr/bin/herdr-sessionizer` is the repo picker bound to
-`prefix+o`. It needs `fd` and `fzf`, both in the Brewfile.
-
-### 4. Make fish the login shell
-
-fish must be registered in `/etc/shells` before `chsh` will accept it:
-
-```sh
-echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
-chsh -s /opt/homebrew/bin/fish
-```
-
-This only affects newly started shells. Herdr names the shell explicitly in
-`~/.config/herdr/config.toml`, so its panes do not depend on `$SHELL`.
-
-Completions need no setup: Homebrew installs fish completions to
-`/opt/homebrew/share/fish/vendor_completions.d`, which fish already searches.
-
-### 5. Fonts
-
-Ghostty config references:
-
-- **Berkeley Mono** — paid, install manually from <https://berkeleygraphics.com/>
-- **Symbols Nerd Font Mono** — `brew install --cask font-symbols-only-nerd-font`
-
-### 6. Secrets (not in this repo)
-
-`~/.config/fish/conf.d/secrets.fish` sources
-`$HOME/.local/share/secrets/env.fish`, which sets `NPM_TOKEN` and
+**Secrets.** `~/.config/fish/conf.d/secrets.fish` sources
+`~/.local/share/secrets/env.fish`, which sets `NPM_TOKEN` and
 `LOTTIE_GITHUB_PACKAGES_TOKEN` with `set -gx`. Restore it from your password
-manager before opening a new shell; the sourcing is guarded, so a missing file
-is not an error.
+manager. The sourcing is guarded, so a missing file is not an error.
 
-### 7. TypeScript native LSP (`tsgo`)
+**Berkeley Mono.** Paid, so it cannot be automated — install it from
+<https://berkeleygraphics.com/>. Ghostty also wants Symbols Nerd Font Mono,
+which *is* in the Brewfile.
 
-Not installed by Mason, whose registry still ships the superseded
-`@typescript/native-preview` build. `lsp.lua` runs `tsc --lsp --stdio`, so the
-binary comes from a global TypeScript 7:
+### First Neovim launch
 
-```sh
-npm install -g typescript
-```
-
-### 8. First Neovim launch
-
-`lazy.nvim` will clone all plugins on first startup. Then:
+`lazy.nvim` clones the plugins on first start. Then:
 
 ```vim
-:Lazy sync       " ensure all plugins are at locked commits
-:Mason           " mason-tool-installer auto-installs the LSP servers + stylua
+:Lazy sync       " install and update plugins
+:Mason           " mason-tool-installer fetches the LSP servers + stylua
 :checkhealth     " verify nvim + lsp are healthy
 ```
 
-## Day-to-day workflow
+## Day-to-day
 
 Edit any config in place — it is a symlink into this repo, so the change is
-already staged for `git diff`. Commit and push from `~/.dotfiles`.
+already there for `git diff`. Commit and push from `~/.dotfiles`.
 
 A new file created inside an already-stowed directory (`~/.config/fish`,
 `~/.config/nvim`, `~/.config/ghostty`) lands in this repo automatically. To
-track a path that is not yet stowed, add it under `home/` and re-run:
-
-```sh
-stow -R -d ~/.dotfiles -t ~ home
-```
+track a path that is not yet stowed, add it under `home/` and run `dot stow`.
 
 `~/.config/herdr` is deliberately *not* folded — the running server keeps
 sockets and logs there, so only `config.toml` and `bin/` are symlinked and the

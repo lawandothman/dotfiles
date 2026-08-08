@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+# Machine setup for these dotfiles. Every step is idempotent, so `dot init` is
+# safe to re-run. `dot doctor` reports what is missing without changing anything.
+set -uo pipefail
+
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GITHUB_EMAIL="lwnd@pm.me"
+SSH_KEY="${HOME}/.ssh/id_ed25519"
+
+# name ;; check command ;; installer function ;; required ;; skip variable
+# Order matters: init runs these top to bottom.
+REGISTRY=(
+  "Homebrew         ;; brew     ;; install_homebrew   ;; true  ;; -"
+  "Brewfile         ;; -        ;; install_packages   ;; true  ;; -"
+  "Stow dotfiles    ;; stow     ;; stow_dotfiles      ;; true  ;; -"
+  "mise tools       ;; mise     ;; install_mise_tools ;; true  ;; -"
+  "TypeScript LSP   ;; tsc      ;; install_typescript ;; false ;; -"
+  "fish login shell ;; fish     ;; setup_fish         ;; false ;; SKIP_SHELL"
+  "SSH key          ;; -        ;; generate_ssh_key   ;; false ;; SKIP_SSH"
+)
+
+bold=$(tput bold 2>/dev/null || true); dim=$(tput dim 2>/dev/null || true)
+red=$(tput setaf 1 2>/dev/null || true); green=$(tput setaf 2 2>/dev/null || true)
+yellow=$(tput setaf 3 2>/dev/null || true); reset=$(tput sgr0 2>/dev/null || true)
+
+info()  { echo "${dim}  $*${reset}"; }
+ok()    { echo "${green}  ✓${reset} $*"; }
+warn()  { echo "${yellow}  !${reset} $*"; }
+fail()  { echo "${red}  ✗${reset} $*"; }
+header(){ echo; echo "${bold}$*${reset}"; }
+
+has() { command -v "$1" >/dev/null 2>&1; }
+
+field() { echo "$1" | awk -F';;' -v n="$2" '{print $n}' | xargs; }
+
+# --- steps ------------------------------------------------------------------
+
+install_homebrew() {
+  has brew && { ok "Homebrew already installed"; return 0; }
+  info "Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+  ok "Homebrew installed"
+}
+
+install_packages() {
+  info "Installing from Brewfile..."
+  brew bundle install --file="${DOTFILES_DIR}/Brewfile" || return 1
+  ok "Brewfile packages installed"
+}
+
+stow_dotfiles() {
+  has stow || { fail "stow is not installed"; return 1; }
+  stow -R -d "${DOTFILES_DIR}" -t "${HOME}" home || return 1
+  ok "Dotfiles stowed"
+}
+
+install_mise_tools() {
+  has mise || { fail "mise is not installed (should have come from the Brewfile)"; return 1; }
+  info "Installing tools from ~/.config/mise/config.toml..."
+  mise install || return 1
+  ok "mise tools installed"
+}
+
+install_typescript() {
+  has npm || { warn "npm not found; skipping TypeScript"; return 0; }
+  if has tsc && tsc --version 2>/dev/null | grep -qE 'Version 7'; then
+    ok "TypeScript 7 already installed"
+    return 0
+  fi
+  info "Installing TypeScript 7 (nvim's tsgo LSP runs tsc --lsp)..."
+  npm install -g typescript || return 1
+  ok "TypeScript installed"
+}
+
+setup_fish() {
+  has fish || { fail "fish is not installed"; return 1; }
+  local fish_path
+  fish_path="$(command -v fish)"
+
+  if ! grep -q "^${fish_path}$" /etc/shells 2>/dev/null; then
+    info "Adding fish to /etc/shells (needs sudo)..."
+    echo "$fish_path" | sudo tee -a /etc/shells >/dev/null || return 1
+  fi
+
+  local current
+  current="$(dscl . -read "${HOME}" UserShell 2>/dev/null | awk '{print $2}')"
+  if [[ "$current" == "$fish_path" ]]; then
+    ok "fish is already the login shell"
+  else
+    info "Setting fish as the login shell..."
+    chsh -s "$fish_path" || return 1
+    ok "Login shell set to fish (affects newly started shells)"
+  fi
+}
+
+generate_ssh_key() {
+  if [[ -f "$SSH_KEY" ]]; then
+    ok "SSH key already exists at ${SSH_KEY}"
+    return 0
+  fi
+  info "Generating an ed25519 SSH key..."
+  mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
+  ssh-keygen -t ed25519 -C "$GITHUB_EMAIL" -f "$SSH_KEY" -N "" || return 1
+  ok "SSH key generated"
+  info "Add it to GitHub:"
+  info "  pbcopy < ${SSH_KEY}.pub"
+  info "  then https://github.com/settings/keys"
+}
+
+# --- commands ---------------------------------------------------------------
+
+cmd_init() {
+  local skip_ssh="${SKIP_SSH:-false}" skip_shell="${SKIP_SHELL:-false}"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --skip-ssh)   skip_ssh=true ;;
+      --skip-shell) skip_shell=true ;;
+      *) fail "unknown option: $1"; return 1 ;;
+    esac
+    shift
+  done
+  export SKIP_SSH="$skip_ssh" SKIP_SHELL="$skip_shell"
+
+  local failed=0
+  for entry in "${REGISTRY[@]}"; do
+    local name fn required skip
+    name=$(field "$entry" 1); fn=$(field "$entry" 3)
+    required=$(field "$entry" 4); skip=$(field "$entry" 5)
+
+    if [[ "$skip" != "-" && "${!skip:-false}" == "true" ]]; then
+      header "$name"; warn "skipped"; continue
+    fi
+
+    header "$name"
+    if ! "$fn"; then
+      if [[ "$required" == "true" ]]; then
+        fail "$name failed — stopping"; return 1
+      fi
+      warn "$name failed — continuing"
+      failed=$((failed + 1))
+    fi
+  done
+
+  header "Done"
+  [[ $failed -gt 0 ]] && warn "$failed optional step(s) failed"
+  info "Restore ~/.local/share/secrets/env.fish from your password manager."
+  info "Berkeley Mono is a paid font — install it from berkeleygraphics.com."
+}
+
+cmd_doctor() {
+  header "Tools"
+  for entry in "${REGISTRY[@]}"; do
+    local name check
+    name=$(field "$entry" 1); check=$(field "$entry" 2)
+    [[ "$check" == "-" ]] && continue
+    if has "$check"; then ok "$name ($check)"; else fail "$name — '$check' not found"; fi
+  done
+
+  header "Dotfiles"
+  if [[ -L "${HOME}/.config/fish" ]]; then ok "stowed (~/.config/fish is a symlink)"; else fail "not stowed"; fi
+  if [[ -f "${HOME}/.local/share/secrets/env.fish" ]]; then ok "secrets present"; else fail "secrets missing — restore env.fish"; fi
+  if [[ -f "$SSH_KEY" ]]; then ok "SSH key present"; else fail "no SSH key at ${SSH_KEY}"; fi
+
+  header "Shell"
+  local current; current="$(dscl . -read "${HOME}" UserShell 2>/dev/null | awk '{print $2}')"
+  if [[ "$current" == *fish ]]; then ok "login shell is fish"; else fail "login shell is ${current:-unknown}"; fi
+
+  header "Fonts"
+  if fc-list 2>/dev/null | grep -qi "berkeley mono" || ls ~/Library/Fonts /Library/Fonts 2>/dev/null | grep -qi "berkeley"; then
+    ok "Berkeley Mono installed"
+  else
+    warn "Berkeley Mono not found (paid — berkeleygraphics.com)"
+  fi
+}
+
+cmd_help() {
+  cat <<EOF
+${bold}dot${reset} — machine setup for these dotfiles
+
+  dot init [--skip-ssh] [--skip-shell]   run every setup step (idempotent)
+  dot doctor                             report what is missing
+  dot stow                               re-link dotfiles into \$HOME
+  dot help                               this message
+EOF
+}
+
+case "${1:-help}" in
+  init)   shift; cmd_init "$@" ;;
+  doctor) cmd_doctor ;;
+  stow)   header "Stow dotfiles"; stow_dotfiles ;;
+  help|-h|--help) cmd_help ;;
+  *) fail "unknown command: $1"; echo; cmd_help; exit 1 ;;
+esac

@@ -1,6 +1,6 @@
 /opt/homebrew/bin/brew shellenv fish | source
 
-fish_add_path $HOME/.cargo/bin
+fish_add_path $HOME/.dotfiles $HOME/.local/bin $HOME/.cargo/bin
 
 fish_add_path /opt/homebrew/opt/llvm/bin
 set -gx LDFLAGS -L/opt/homebrew/opt/llvm/lib
