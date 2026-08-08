@@ -35,21 +35,19 @@ return {
     },
 
     config = function(_, opts)
-      local actions = require 'diffview.actions'
-
       require('diffview').setup(opts)
     end,
+    -- Flat namespace: every <leader>g* entry is a leaf, so none of them stall
+    -- waiting to see whether a longer sequence is coming.
     keys = {
-      { '<leader>gdc', ':DiffviewOpen origin/main...HEAD', desc = 'Compare commits' },
-      { '<leader>gdq', ':DiffviewClose<CR>', desc = 'Close Diffview tab' },
-      { '<leader>gdh', ':DiffviewFileHistory %<CR>', desc = 'File history' },
-      { '<leader>gdH', ':DiffviewFileHistory<CR>', desc = 'Repo history' },
-      { '<leader>gdm', ':DiffviewOpen<CR>', desc = 'Solve merge conflicts' },
-      { '<leader>gdo', ':DiffviewOpen main', desc = 'DiffviewOpen' },
-      { '<leader>gdt', ':DiffviewOpen<CR>', desc = 'DiffviewOpen this' },
-      { '<leader>gdp', ':DiffviewOpen origin/main...HEAD --imply-local', desc = 'Review current PR' },
+      { '<leader>gd', ':DiffviewOpen<CR>', desc = 'Diff view (working copy)' },
+      { '<leader>gc', ':DiffviewClose<CR>', desc = 'Close diff view' },
+      { '<leader>gh', ':DiffviewFileHistory %<CR>', desc = 'File history (current)' },
+      { '<leader>gH', ':DiffviewFileHistory<CR>', desc = 'File history (repo)' },
+      { '<leader>go', ':DiffviewOpen main', desc = 'Diff against a ref' },
+      { '<leader>gp', ':DiffviewOpen origin/main...HEAD --imply-local', desc = 'Review current PR' },
       {
-        '<leader>gdP',
+        '<leader>gP',
         ':DiffviewFileHistory --range=origin/main...HEAD --right-only --no-merges --reverse',
         desc = 'Review current PR (per commit)',
       },

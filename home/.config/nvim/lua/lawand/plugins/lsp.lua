@@ -99,9 +99,9 @@ return {
         local builtin = require 'telescope.builtin'
 
         map('gd', builtin.lsp_definitions, '[G]oto [D]efinition')
-        map('<leader>gd', function()
+        map('<leader>dv', function()
           builtin.lsp_definitions { jump_type = 'vsplit' }
-        end, '[G]oto [D]efinition in vertical split')
+        end, '[D]efinition in [V]ertical split')
 
         map('gr', builtin.lsp_references, '[G]oto [R]eferences')
         map('gI', builtin.lsp_implementations, '[G]oto [I]mplementation')
