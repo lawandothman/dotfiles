@@ -3,8 +3,6 @@ return {
     'folke/trouble.nvim',
     lazy = true,
     dependencies = {
-      -- icons supported via mini-icons.lua
-
       {
         'nvim-lualine/lualine.nvim',
         opts = {

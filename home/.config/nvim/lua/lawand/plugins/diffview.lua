@@ -5,7 +5,6 @@ return {
     lazy = true,
     dependencies = {
       { 'nvim-lua/plenary.nvim' },
-      -- icons supported via mini-icons.lua
     },
 
     opts = {
