@@ -11,6 +11,7 @@ readonly BREWFILE="${DOTFILES_DIR}/Brewfile"
 readonly FAILED_PACKAGES="${DOTFILES_DIR}/.failed-packages"
 readonly GITHUB_EMAIL="lwnd@pm.me"
 readonly SSH_KEY="${HOME}/.ssh/id_ed25519"
+readonly FONT_REPO="git@github.com:lawandothman/berkeley-mono.git"
 
 bold=$(tput bold 2>/dev/null || true); dim=$(tput dim 2>/dev/null || true)
 red=$(tput setaf 1 2>/dev/null || true); green=$(tput setaf 2 2>/dev/null || true)
@@ -47,6 +48,7 @@ REGISTRY=(
   "TypeScript LSP   ;; tsc  ;; install_typescript ;; false ;; -"
   "fish login shell ;; fish ;; setup_fish         ;; false ;; SKIP_SHELL"
   "SSH key          ;; -    ;; generate_ssh_key   ;; false ;; SKIP_SSH"
+  "Berkeley Mono    ;; -    ;; install_font       ;; false ;; SKIP_FONT"
 )
 
 field() { echo "$1" | awk -F';;' -v n="$2" '{print $n}' | xargs; }
@@ -175,19 +177,47 @@ generate_ssh_key() {
   info "Add it at https://github.com/settings/keys"
 }
 
+# Berkeley Mono is paid, so it lives in a private repo rather than a Brewfile
+# cask. Needs the SSH key to exist *and* already be on GitHub, which is why this
+# runs after generate_ssh_key.
+install_font() {
+  if ls ~/Library/Fonts 2>/dev/null | grep -qi berkeley; then
+    ok "Berkeley Mono already installed"; return 0
+  fi
+  [[ -f "$SSH_KEY" ]] || { warn "no SSH key — skipping font"; return 0; }
+  confirm "Is ${SSH_KEY}.pub added to your GitHub account?" "n" || { warn "skipping font"; return 0; }
+
+  local tmp; tmp=$(mktemp -d)
+  info "Cloning the font repo..."
+  if ! GIT_SSH_COMMAND="ssh -i '$SSH_KEY' -o IdentitiesOnly=yes" git clone -q "$FONT_REPO" "$tmp"; then
+    fail "clone failed — is the key on GitHub and does it have access?"
+    rm -rf "$tmp"; return 1
+  fi
+
+  mkdir -p "${HOME}/Library/Fonts"
+  local n=0 f
+  while IFS= read -r -d '' f; do
+    cp "$f" "${HOME}/Library/Fonts/"; n=$((n + 1))
+  done < <(find "$tmp" -type f \( -name '*.otf' -o -name '*.ttf' \) -print0)
+  rm -rf "$tmp"
+
+  if [[ $n -gt 0 ]]; then ok "installed $n font file(s)"; else warn "no fonts found in the repo"; fi
+}
+
 # --- commands ---------------------------------------------------------------
 
 cmd_init() {
-  local skip_ssh="${SKIP_SSH:-false}" skip_shell="${SKIP_SHELL:-false}"
+  local skip_ssh="${SKIP_SSH:-false}" skip_shell="${SKIP_SHELL:-false}" skip_font="${SKIP_FONT:-false}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-ssh)   skip_ssh=true ;;
       --skip-shell) skip_shell=true ;;
+      --skip-font)  skip_font=true ;;
       *) fail "unknown option: $1"; return 1 ;;
     esac
     shift
   done
-  export SKIP_SSH="$skip_ssh" SKIP_SHELL="$skip_shell"
+  export SKIP_SSH="$skip_ssh" SKIP_SHELL="$skip_shell" SKIP_FONT="$skip_font"
 
   header "Initializing dotfiles"
 
@@ -217,7 +247,7 @@ cmd_init() {
   header "Initialization complete"
   [[ $failed -gt 0 ]] && warn "$failed optional step(s) failed"
   info "Restore ~/.local/share/secrets/env.fish from your password manager."
-  info "Berkeley Mono is a paid font — install it from berkeleygraphics.com."
+  [[ "$skip_font" == "true" ]] && info "Berkeley Mono skipped — 'dot init' without --skip-font installs it."
   return 0
 }
 
@@ -358,7 +388,8 @@ ${bold}USAGE${reset}
     ${SCRIPT_NAME} COMMAND [ARGS]
 
 ${bold}COMMANDS${reset}
-    init [--skip-ssh] [--skip-shell]   run every setup step (idempotent)
+    init [--skip-ssh] [--skip-shell] [--skip-font]
+                                       run every setup step (idempotent)
     update                             pull, upgrade brew + mise, re-stow
     doctor                             report what is missing, change nothing
     stow                               re-link dotfiles into \$HOME

@@ -26,20 +26,21 @@ re-running it is safe.
 | TypeScript LSP | global `typescript` 7, which nvim runs as `tsc --lsp` |
 | fish login shell | adds fish to `/etc/shells`, then `chsh` |
 | SSH key | ed25519, and prints where to paste the public half |
+| Berkeley Mono | clones the private font repo and installs it |
 
-Skip the interactive steps with `--skip-ssh` and `--skip-shell`.
+Skip the interactive steps with `--skip-ssh`, `--skip-shell` and `--skip-font`.
 
 `dot doctor` reports what is present and what is missing without changing
 anything.
 
-### Two things `dot` cannot do
+### One thing `dot` cannot do
 
 **Secrets.** `~/.config/fish/conf.d/secrets.fish` sources
 `~/.local/share/secrets/env.fish`, which is not in this repo.
 
-**Berkeley Mono.** Paid, so it cannot be automated — install it from
-<https://berkeleygraphics.com/>. Ghostty also wants Symbols Nerd Font Mono,
-which *is* in the Brewfile.
+Berkeley Mono is paid, so it comes from a private repo rather than a cask —
+the font step needs the SSH key to be on GitHub first, which is why it runs
+last. Symbols Nerd Font Mono is in the Brewfile.
 
 ### First Neovim launch
 
