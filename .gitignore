@@ -15,3 +15,6 @@ home/.config/nvim/.claude/
 # nvim scratch/runtime
 home/.config/nvim/spell/
 home/.config/nvim/tags
+
+# plugin lockfile — checker is enabled instead
+home/.config/nvim/lazy-lock.json

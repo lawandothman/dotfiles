@@ -19,4 +19,6 @@ require('lazy').setup {
   spec = {
     { import = 'lawand.plugins' },
   },
+
+  checker = { enabled = true },
 }
