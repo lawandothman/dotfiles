@@ -1,0 +1,13 @@
+.DS_Store
+
+# fish universal variables (runtime)
+home/.config/fish/fish_variables
+
+# herdr runtime state
+home/.config/herdr/*.log
+home/.config/herdr/*.sock
+home/.config/herdr/session.json
+home/.config/herdr/.plugins.lock
+
+# Claude Code local settings
+home/.config/nvim/.claude/

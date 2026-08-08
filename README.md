@@ -1,6 +1,10 @@
 # dotfiles
 
-Personal macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
+Personal macOS dotfiles, symlinked into `$HOME` with [GNU Stow](https://www.gnu.org/software/stow/).
+
+Everything under `home/` mirrors `$HOME` exactly, so `home/.config/fish/config.fish`
+becomes `~/.config/fish/config.fish`. Because the files are symlinks, editing a
+config edits this repo directly — there is no apply step.
 
 ## Restore on a fresh machine
 
@@ -21,15 +25,16 @@ ssh-keygen -t ed25519 -C "lwnd@pm.me"
 # add ~/.ssh/id_ed25519.pub to https://github.com/settings/keys
 ```
 
-### 2. Pull the dotfiles
+### 2. Clone and stow
 
 ```sh
-brew install chezmoi
-chezmoi init --apply git@github.com:lawandothman/dotfiles.git
+git clone git@github.com:lawandothman/dotfiles.git ~/.dotfiles
+brew install stow
+stow -R -d ~/.dotfiles -t ~ home
 ```
 
-That places everything tracked in this repo (`~/.config/nvim`, `~/.config/ghostty`,
-`~/.config/herdr`, `~/.config/fish`, `~/.gitconfig`, ...) into `$HOME`.
+Stow refuses to overwrite existing real files. If it reports a conflict, move
+the offending file aside and re-run.
 
 ### 3. Tools used by the configs
 
@@ -37,7 +42,7 @@ A snapshot of every installed formula, cask, and tap lives in
 [`Brewfile`](./Brewfile). Restore everything in one shot:
 
 ```sh
-brew bundle install --file=~/.local/share/chezmoi/Brewfile
+brew bundle install --file=~/.dotfiles/Brewfile
 ```
 
 `~/.config/herdr/bin/herdr-sessionizer` is the repo picker bound to
@@ -95,21 +100,25 @@ npm install -g typescript
 
 ## Day-to-day workflow
 
+Edit any config in place — it is a symlink into this repo, so the change is
+already staged for `git diff`. Commit and push from `~/.dotfiles`.
+
+A new file created inside an already-stowed directory (`~/.config/fish`,
+`~/.config/nvim`, `~/.config/ghostty`) lands in this repo automatically. To
+track a path that is not yet stowed, add it under `home/` and re-run:
+
 ```sh
-chezmoi cd                # cd into the source repo (~/.local/share/chezmoi)
-chezmoi diff              # preview pending changes
-chezmoi apply             # write source → home
-chezmoi re-add <path>     # pull a live edit back into source
-chezmoi add <path>        # start tracking a new file
-chezmoi forget <path>     # stop tracking (keeps the live file)
+stow -R -d ~/.dotfiles -t ~ home
 ```
 
-After editing in source, commit and push from `chezmoi cd`.
+`~/.config/herdr` is deliberately *not* folded — the running server keeps
+sockets and logs there, so only `config.toml` and `bin/` are symlinked and the
+runtime files stay out of the repo.
 
 After installing or removing tools, refresh the Brewfile snapshot:
 
 ```sh
-brew bundle dump --force --file=~/.local/share/chezmoi/Brewfile
+brew bundle dump --force --file=~/.dotfiles/Brewfile
 ```
 
 Then **review the diff** — this repo is public, so strip anything
