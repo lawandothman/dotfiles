@@ -61,11 +61,8 @@ echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
 ```
 
-kubectl completions are generated rather than tracked:
-
-```sh
-kubectl completion fish > ~/.config/fish/completions/kubectl.fish
-```
+Completions need no setup: Homebrew installs fish completions to
+`/opt/homebrew/share/fish/vendor_completions.d`, which fish already searches.
 
 ### 4. Fonts
 
