@@ -43,33 +43,29 @@ brew bundle install --file=~/.local/share/chezmoi/Brewfile
 `~/.config/herdr/bin/herdr-sessionizer` is the repo picker bound to
 `prefix+o`. It needs `fd` and `fzf`, both in the Brewfile.
 
-After updating tools on the running machine, refresh the snapshot:
+### 4. Make fish the login shell
 
-```sh
-brew bundle dump --force --file=~/.local/share/chezmoi/Brewfile
-```
-
-Then `chezmoi cd`, **review the diff** (this repo is public — strip anything
-work-specific or private before committing), and commit.
-
-Make fish the login shell (it must be registered first):
+fish must be registered in `/etc/shells` before `chsh` will accept it:
 
 ```sh
 echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
 ```
 
+This only affects newly started shells. Herdr names the shell explicitly in
+`~/.config/herdr/config.toml`, so its panes do not depend on `$SHELL`.
+
 Completions need no setup: Homebrew installs fish completions to
 `/opt/homebrew/share/fish/vendor_completions.d`, which fish already searches.
 
-### 4. Fonts
+### 5. Fonts
 
 Ghostty config references:
 
 - **Berkeley Mono** — paid, install manually from <https://berkeleygraphics.com/>
 - **Symbols Nerd Font Mono** — `brew install --cask font-symbols-only-nerd-font`
 
-### 5. Secrets (not in this repo)
+### 6. Secrets (not in this repo)
 
 `~/.config/fish/conf.d/secrets.fish` sources
 `$HOME/.local/share/secrets/env.fish`, which sets `NPM_TOKEN` and
@@ -77,7 +73,7 @@ Ghostty config references:
 manager before opening a new shell; the sourcing is guarded, so a missing file
 is not an error.
 
-### 6. TypeScript native LSP (`tsgo`)
+### 7. TypeScript native LSP (`tsgo`)
 
 Not installed by Mason, whose registry still ships the superseded
 `@typescript/native-preview` build. `lsp.lua` runs `tsc --lsp --stdio`, so the
@@ -87,7 +83,7 @@ binary comes from a global TypeScript 7:
 npm install -g typescript
 ```
 
-### 7. First Neovim launch
+### 8. First Neovim launch
 
 `lazy.nvim` will clone all plugins on first startup. Then:
 
@@ -109,3 +105,12 @@ chezmoi forget <path>     # stop tracking (keeps the live file)
 ```
 
 After editing in source, commit and push from `chezmoi cd`.
+
+After installing or removing tools, refresh the Brewfile snapshot:
+
+```sh
+brew bundle dump --force --file=~/.local/share/chezmoi/Brewfile
+```
+
+Then **review the diff** — this repo is public, so strip anything
+work-specific or private before committing.
