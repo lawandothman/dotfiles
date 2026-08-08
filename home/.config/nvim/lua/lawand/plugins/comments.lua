@@ -1,6 +1,12 @@
 return {
   {
     'numToStr/Comment.nvim',
+    keys = {
+      { 'gc', mode = { 'n', 'x' }, desc = 'Comment (motion/selection)' },
+      { 'gcc', desc = 'Comment line' },
+      { 'gb', mode = { 'n', 'x' }, desc = 'Comment block' },
+      { 'gbc', desc = 'Comment block line' },
+    },
     dependencies = {
       {
         'JoosepAlviste/nvim-ts-context-commentstring',
@@ -17,7 +23,7 @@ return {
   },
   {
     'folke/todo-comments.nvim',
-    event = 'VimEnter',
+    event = { 'BufReadPost', 'BufNewFile' },
     dependencies = {
       'nvim-lua/plenary.nvim',
     },

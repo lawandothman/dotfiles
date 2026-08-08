@@ -19,7 +19,7 @@ return {
     -- use opts = {} for passing setup options
     -- this is equivalent to setup({}) function
   },
-  { 'windwp/nvim-ts-autotag', opts = {} },
+  { 'windwp/nvim-ts-autotag', event = { 'BufReadPre', 'BufNewFile' }, opts = {} },
   {
     'stevearc/dressing.nvim',
     dependencies = { 'MunifTanjim/nui.nvim' },
