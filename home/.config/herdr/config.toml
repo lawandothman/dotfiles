@@ -1,6 +1,5 @@
 # Herdr configuration
-# Bindings ported from ~/.tmux.conf. Structure and reference comments follow
-# dmmulroy/.dotfiles.
+# Bindings ported from ~/.tmux.conf.
 # Full reference: https://herdr.dev/docs/config-reference/
 #
 # Active values differ from Herdr's defaults. Default or unset values remain

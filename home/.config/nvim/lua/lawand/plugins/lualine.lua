@@ -17,7 +17,14 @@ return {
       sections = {
         lualine_a = { { 'mode', separator = { left = '' }, right_padding = 2 } },
         lualine_b = { { 'filename', file_status = false, path = 1 }, 'branch' },
-        lualine_c = { 'diff' },
+        lualine_c = {
+          {
+            'diff',
+            source = function()
+              return vim.b[vim.api.nvim_get_current_buf()].vcsigns_stats
+            end,
+          },
+        },
         lualine_x = { { 'diagnostics', sources = { 'nvim_diagnostic' } } },
         lualine_y = { 'filetype', '%p%%/%L' },
         lualine_z = {
