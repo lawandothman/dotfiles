@@ -26,7 +26,7 @@ vim.keymap.set('n', '<C-i>', '<C-i>zz', { desc = 'Jump forward (centered)' })
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
-vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = '[S]ubstitute word under cursor' })
 vim.keymap.set('x', '<leader>p', [["_dP]])
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
@@ -73,7 +73,7 @@ vim.keymap.set('n', '<leader>t', function()
   vim.cmd.term()
   vim.cmd.wincmd 'J'
   vim.api.nvim_win_set_height(0, 5)
-end)
+end, { desc = 'Open [T]erminal split' })
 
 vim.keymap.set('v', '<', '<gv', { desc = 'Indent left' })
 vim.keymap.set('v', '>', '>gv', { desc = 'Indent right' })
