@@ -48,7 +48,9 @@ vim.keymap.set('n', '[d', diagnostic_jump(-1), { desc = 'Go to previous [D]iagno
 vim.keymap.set('n', ']d', diagnostic_jump(1), { desc = 'Go to next [D]iagnostic message' })
 vim.keymap.set('n', ']q', '<cmd>cnext<CR>zz', { desc = 'Next [Q]uickfix item' })
 vim.keymap.set('n', '[q', '<cmd>cprevious<CR>zz', { desc = 'Previous [Q]uickfix item' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Show diagnostic [E]rror messages' })
+vim.keymap.set('n', '<leader>d', function()
+  vim.diagnostic.open_float { border = 'rounded' }
+end, { desc = 'Show diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
@@ -68,7 +70,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
-vim.keymap.set('n', '-', '<CMD>Oil --float<CR>', { desc = 'Open Oil' })
+vim.keymap.set('n', '<leader>e', function()
+  require('oil').toggle_float()
+end, { desc = 'Open Oil' })
 
 vim.keymap.set('n', '<leader>t', function()
   vim.cmd.vnew()
