@@ -35,9 +35,9 @@ anything.
 ### Two things `dot` cannot do
 
 **Secrets.** `~/.config/fish/conf.d/secrets.fish` sources
-`~/.local/share/secrets/env.fish`, which sets `NPM_TOKEN` and
-`LOTTIE_GITHUB_PACKAGES_TOKEN` with `set -gx`. Restore it from your password
-manager. The sourcing is guarded, so a missing file is not an error.
+`~/.local/share/secrets/env.fish`, which exports the registry tokens with
+`set -gx`. Restore it from your password manager. The sourcing is guarded, so a
+missing file is not an error.
 
 **Berkeley Mono.** Paid, so it cannot be automated — install it from
 <https://berkeleygraphics.com/>. Ghostty also wants Symbols Nerd Font Mono,

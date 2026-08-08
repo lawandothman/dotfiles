@@ -3,61 +3,136 @@
 # safe to re-run. `dot doctor` reports what is missing without changing anything.
 set -uo pipefail
 
+readonly SCRIPT_NAME="dot"
+readonly VERSION="1.0.0"
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GITHUB_EMAIL="lwnd@pm.me"
-SSH_KEY="${HOME}/.ssh/id_ed25519"
+readonly DOTFILES_DIR
+readonly BREWFILE="${DOTFILES_DIR}/Brewfile"
+readonly FAILED_PACKAGES="${DOTFILES_DIR}/.failed-packages"
+readonly GITHUB_EMAIL="lwnd@pm.me"
+readonly SSH_KEY="${HOME}/.ssh/id_ed25519"
+
+bold=$(tput bold 2>/dev/null || true); dim=$(tput dim 2>/dev/null || true)
+red=$(tput setaf 1 2>/dev/null || true); green=$(tput setaf 2 2>/dev/null || true)
+yellow=$(tput setaf 3 2>/dev/null || true); blue=$(tput setaf 4 2>/dev/null || true)
+reset=$(tput sgr0 2>/dev/null || true)
+
+CURRENT_STEP=0
+TOTAL_STEPS=0
+
+info()   { echo "${dim}  $*${reset}"; }
+ok()     { echo "${green}  ✓${reset} $*"; }
+warn()   { echo "${yellow}  !${reset} $*"; }
+fail()   { echo "${red}  ✗${reset} $*" >&2; }
+header() { echo; echo "${bold}${blue}==>${reset} ${bold}$*${reset}"; }
+step()   { CURRENT_STEP=$((CURRENT_STEP + 1)); echo; echo "${bold}[${CURRENT_STEP}/${TOTAL_STEPS}]${reset} $*"; }
+
+has() { command -v "$1" >/dev/null 2>&1; }
+
+confirm() {
+  local prompt="$1" default="${2:-n}" response=""
+  [[ "$default" == "y" ]] && prompt="$prompt [Y/n]: " || prompt="$prompt [y/N]: "
+  read -r -p "$prompt" response
+  [[ -z "$response" ]] && response="$default"
+  [[ "$response" =~ ^[yY] ]]
+}
 
 # name ;; check command ;; installer function ;; required ;; skip variable
 # Order matters: init runs these top to bottom.
 REGISTRY=(
-  "Homebrew         ;; brew     ;; install_homebrew   ;; true  ;; -"
-  "Brewfile         ;; -        ;; install_packages   ;; true  ;; -"
-  "Stow dotfiles    ;; stow     ;; stow_dotfiles      ;; true  ;; -"
-  "mise tools       ;; mise     ;; install_mise_tools ;; true  ;; -"
-  "TypeScript LSP   ;; tsc      ;; install_typescript ;; false ;; -"
-  "fish login shell ;; fish     ;; setup_fish         ;; false ;; SKIP_SHELL"
-  "SSH key          ;; -        ;; generate_ssh_key   ;; false ;; SKIP_SSH"
+  "Homebrew         ;; brew ;; install_homebrew   ;; true  ;; -"
+  "Brewfile         ;; -    ;; install_packages   ;; true  ;; -"
+  "Stow dotfiles    ;; stow ;; stow_dotfiles      ;; true  ;; -"
+  "mise tools       ;; mise ;; install_mise_tools ;; true  ;; -"
+  "TypeScript LSP   ;; tsc  ;; install_typescript ;; false ;; -"
+  "fish login shell ;; fish ;; setup_fish         ;; false ;; SKIP_SHELL"
+  "SSH key          ;; -    ;; generate_ssh_key   ;; false ;; SKIP_SSH"
 )
 
-bold=$(tput bold 2>/dev/null || true); dim=$(tput dim 2>/dev/null || true)
-red=$(tput setaf 1 2>/dev/null || true); green=$(tput setaf 2 2>/dev/null || true)
-yellow=$(tput setaf 3 2>/dev/null || true); reset=$(tput sgr0 2>/dev/null || true)
-
-info()  { echo "${dim}  $*${reset}"; }
-ok()    { echo "${green}  ✓${reset} $*"; }
-warn()  { echo "${yellow}  !${reset} $*"; }
-fail()  { echo "${red}  ✗${reset} $*"; }
-header(){ echo; echo "${bold}$*${reset}"; }
-
-has() { command -v "$1" >/dev/null 2>&1; }
-
 field() { echo "$1" | awk -F';;' -v n="$2" '{print $n}' | xargs; }
+
+# Emit "type<TAB>name" for a Brewfile line, or fail for comments/blanks.
+parse_brewfile_line() {
+  local line="$1"
+  [[ "$line" =~ ^[[:space:]]*# ]] && return 1
+  [[ -z "${line//[[:space:]]/}" ]] && return 1
+  if [[ "$line" =~ ^[[:space:]]*brew[[:space:]]+\"([^\"]+)\" ]]; then
+    printf 'brew\t%s\n' "${BASH_REMATCH[1]}"; return 0
+  fi
+  if [[ "$line" =~ ^[[:space:]]*cask[[:space:]]+\"([^\"]+)\" ]]; then
+    printf 'cask\t%s\n' "${BASH_REMATCH[1]}"; return 0
+  fi
+  return 1
+}
+
+brew_install_one() {
+  case "$1" in
+    brew) brew install "$2" ;;
+    cask) brew install --cask "$2" ;;
+    *) return 1 ;;
+  esac
+}
 
 # --- steps ------------------------------------------------------------------
 
 install_homebrew() {
   has brew && { ok "Homebrew already installed"; return 0; }
   info "Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-  ok "Homebrew installed"
+  local log; log=$(mktemp)
+  if NONINTERACTIVE=1 /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" >"$log" 2>&1; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    ok "Homebrew installed"
+    rm -f "$log"
+  else
+    fail "Homebrew install failed — last 20 lines:"
+    tail -20 "$log" | while IFS= read -r l; do echo "      $l"; done
+    rm -f "$log"
+    return 1
+  fi
 }
 
+# brew bundle is all-or-nothing, so fall back to installing one at a time and
+# record what failed for `dot retry-failed`.
 install_packages() {
-  info "Installing from Brewfile..."
-  brew bundle install --file="${DOTFILES_DIR}/Brewfile" || return 1
-  ok "Brewfile packages installed"
+  [[ -f "$BREWFILE" ]] || { fail "Brewfile not found at $BREWFILE"; return 1; }
+
+  if brew bundle install --file="$BREWFILE"; then
+    ok "Brewfile packages installed"
+    rm -f "$FAILED_PACKAGES"
+    return 0
+  fi
+
+  warn "brew bundle failed — retrying package by package"
+  local failed=() line parsed ptype pname installed=0
+  while IFS= read -r line; do
+    parsed=$(parse_brewfile_line "$line") || continue
+    IFS=$'\t' read -r ptype pname <<< "$parsed"
+    if brew_install_one "$ptype" "$pname" >/dev/null 2>&1; then
+      installed=$((installed + 1))
+    else
+      warn "failed: $pname"
+      failed+=("${ptype}:${pname}")
+    fi
+  done < "$BREWFILE"
+
+  ok "$installed package(s) installed"
+  if [[ ${#failed[@]} -gt 0 ]]; then
+    printf '%s\n' "${failed[@]}" | sort -u > "$FAILED_PACKAGES"
+    warn "${#failed[@]} failed — recorded in .failed-packages, retry with '${SCRIPT_NAME} retry-failed'"
+    return 1
+  fi
+  rm -f "$FAILED_PACKAGES"
 }
 
 stow_dotfiles() {
   has stow || { fail "stow is not installed"; return 1; }
-  stow -R -d "${DOTFILES_DIR}" -t "${HOME}" home || return 1
+  stow -R -d "$DOTFILES_DIR" -t "$HOME" home || return 1
   ok "Dotfiles stowed"
 }
 
 install_mise_tools() {
   has mise || { fail "mise is not installed (should have come from the Brewfile)"; return 1; }
-  info "Installing tools from ~/.config/mise/config.toml..."
   mise install || return 1
   ok "mise tools installed"
 }
@@ -65,8 +140,7 @@ install_mise_tools() {
 install_typescript() {
   has npm || { warn "npm not found; skipping TypeScript"; return 0; }
   if has tsc && tsc --version 2>/dev/null | grep -qE 'Version 7'; then
-    ok "TypeScript 7 already installed"
-    return 0
+    ok "TypeScript 7 already installed"; return 0
   fi
   info "Installing TypeScript 7 (nvim's tsgo LSP runs tsc --lsp)..."
   npm install -g typescript || return 1
@@ -75,37 +149,30 @@ install_typescript() {
 
 setup_fish() {
   has fish || { fail "fish is not installed"; return 1; }
-  local fish_path
-  fish_path="$(command -v fish)"
+  local fish_path; fish_path="$(command -v fish)"
 
   if ! grep -q "^${fish_path}$" /etc/shells 2>/dev/null; then
     info "Adding fish to /etc/shells (needs sudo)..."
     echo "$fish_path" | sudo tee -a /etc/shells >/dev/null || return 1
   fi
 
-  local current
-  current="$(dscl . -read "${HOME}" UserShell 2>/dev/null | awk '{print $2}')"
+  local current; current="$(dscl . -read "$HOME" UserShell 2>/dev/null | awk '{print $2}')"
   if [[ "$current" == "$fish_path" ]]; then
     ok "fish is already the login shell"
   else
-    info "Setting fish as the login shell..."
     chsh -s "$fish_path" || return 1
     ok "Login shell set to fish (affects newly started shells)"
   fi
 }
 
 generate_ssh_key() {
-  if [[ -f "$SSH_KEY" ]]; then
-    ok "SSH key already exists at ${SSH_KEY}"
-    return 0
-  fi
+  if [[ -f "$SSH_KEY" ]]; then ok "SSH key already exists at ${SSH_KEY}"; return 0; fi
   info "Generating an ed25519 SSH key..."
   mkdir -p "${HOME}/.ssh" && chmod 700 "${HOME}/.ssh"
   ssh-keygen -t ed25519 -C "$GITHUB_EMAIL" -f "$SSH_KEY" -N "" || return 1
   ok "SSH key generated"
-  info "Add it to GitHub:"
-  info "  pbcopy < ${SSH_KEY}.pub"
-  info "  then https://github.com/settings/keys"
+  has pbcopy && { pbcopy < "${SSH_KEY}.pub"; info "Public key copied to clipboard"; }
+  info "Add it at https://github.com/settings/keys"
 }
 
 # --- commands ---------------------------------------------------------------
@@ -122,73 +189,206 @@ cmd_init() {
   done
   export SKIP_SSH="$skip_ssh" SKIP_SHELL="$skip_shell"
 
-  local failed=0
+  header "Initializing dotfiles"
+
+  TOTAL_STEPS=0
+  local entry skip
   for entry in "${REGISTRY[@]}"; do
-    local name fn required skip
+    skip=$(field "$entry" 5)
+    [[ "$skip" != "-" && "${!skip:-false}" == "true" ]] && continue
+    TOTAL_STEPS=$((TOTAL_STEPS + 1))
+  done
+  CURRENT_STEP=0
+
+  local failed=0 name fn required
+  for entry in "${REGISTRY[@]}"; do
     name=$(field "$entry" 1); fn=$(field "$entry" 3)
     required=$(field "$entry" 4); skip=$(field "$entry" 5)
+    [[ "$skip" != "-" && "${!skip:-false}" == "true" ]] && continue
 
-    if [[ "$skip" != "-" && "${!skip:-false}" == "true" ]]; then
-      header "$name"; warn "skipped"; continue
-    fi
-
-    header "$name"
+    step "$name"
     if ! "$fn"; then
-      if [[ "$required" == "true" ]]; then
-        fail "$name failed — stopping"; return 1
-      fi
-      warn "$name failed — continuing"
+      if [[ "$required" == "true" ]]; then fail "$name failed — stopping"; return 1; fi
+      warn "$name failed (continuing)"
       failed=$((failed + 1))
     fi
   done
 
-  header "Done"
+  header "Initialization complete"
   [[ $failed -gt 0 ]] && warn "$failed optional step(s) failed"
   info "Restore ~/.local/share/secrets/env.fish from your password manager."
   info "Berkeley Mono is a paid font — install it from berkeleygraphics.com."
+  return 0
+}
+
+cmd_update() {
+  header "Updating dotfiles"
+  if git -C "$DOTFILES_DIR" pull --ff-only; then ok "Repository updated"; else fail "git pull failed"; return 1; fi
+
+  header "Updating Homebrew"
+  brew update || { fail "brew update failed"; return 1; }
+  local outdated; outdated=$(brew outdated) || true
+  if [[ -z "$outdated" ]]; then
+    ok "Everything already up to date"
+  else
+    echo "$outdated" | sed 's/^/    /'
+    if confirm "Upgrade these?" "y"; then
+      brew upgrade && ok "Packages upgraded" || warn "Some upgrades failed"
+    else
+      info "Skipped"
+    fi
+  fi
+
+  header "Re-stowing dotfiles"
+  stow_dotfiles
+
+  if has mise; then
+    header "Updating mise tools"
+    mise upgrade && ok "mise tools upgraded" || warn "mise upgrade failed"
+  fi
 }
 
 cmd_doctor() {
   header "Tools"
+  local entry name check
   for entry in "${REGISTRY[@]}"; do
-    local name check
     name=$(field "$entry" 1); check=$(field "$entry" 2)
     [[ "$check" == "-" ]] && continue
-    if has "$check"; then ok "$name ($check)"; else fail "$name — '$check' not found"; fi
+    has "$check" && ok "$name ($check)" || fail "$name — '$check' not found"
+  done
+  for t in git gh nvim node npm starship herdr; do
+    has "$t" && ok "$t is available" || warn "$t not found"
   done
 
   header "Dotfiles"
-  if [[ -L "${HOME}/.config/fish" ]]; then ok "stowed (~/.config/fish is a symlink)"; else fail "not stowed"; fi
-  if [[ -f "${HOME}/.local/share/secrets/env.fish" ]]; then ok "secrets present"; else fail "secrets missing — restore env.fish"; fi
-  if [[ -f "$SSH_KEY" ]]; then ok "SSH key present"; else fail "no SSH key at ${SSH_KEY}"; fi
+  [[ -L "${HOME}/.config/fish" ]] && ok "stowed (~/.config/fish is a symlink)" || fail "not stowed"
+  [[ -f "${HOME}/.local/share/secrets/env.fish" ]] && ok "secrets present" || fail "secrets missing — restore env.fish"
+  [[ -f "$SSH_KEY" ]] && ok "SSH key present" || warn "no SSH key at ${SSH_KEY}"
+  if echo "$PATH" | grep -q "$DOTFILES_DIR"; then
+    ok "${DOTFILES_DIR/#$HOME/~} is on PATH"
+  else
+    warn "${DOTFILES_DIR/#$HOME/~} not on PATH in this shell"
+  fi
+
+  # Stow leaves dangling links behind when a file is renamed in the repo.
+  header "Symlinks"
+  local ours=0 theirs=0 link target
+  while IFS= read -r -d '' link; do
+    [[ -e "$link" ]] && continue
+    target=$(readlink "$link")
+    if [[ "$target" == *".dotfiles/"* ]]; then
+      ours=$((ours + 1)); fail "dangling into repo: ${link/#$HOME/~} -> $target"
+    else
+      theirs=$((theirs + 1)); info "unrelated dangling link: ${link/#$HOME/~}"
+    fi
+  done < <(find "$HOME" -maxdepth 3 -type l -print0 2>/dev/null)
+  if [[ $ours -eq 0 ]]; then
+    ok "no dangling links into the repo"
+  else
+    warn "$ours link(s) point at missing repo files — run '${SCRIPT_NAME} stow'"
+  fi
+  [[ $theirs -gt 0 ]] && info "($theirs unrelated dangling link(s), not managed here)"
 
   header "Shell"
-  local current; current="$(dscl . -read "${HOME}" UserShell 2>/dev/null | awk '{print $2}')"
-  if [[ "$current" == *fish ]]; then ok "login shell is fish"; else fail "login shell is ${current:-unknown}"; fi
+  local current; current="$(dscl . -read "$HOME" UserShell 2>/dev/null | awk '{print $2}')"
+  [[ "$current" == *fish ]] && ok "login shell is fish" || warn "login shell is ${current:-unknown}"
 
   header "Fonts"
-  if fc-list 2>/dev/null | grep -qi "berkeley mono" || ls ~/Library/Fonts /Library/Fonts 2>/dev/null | grep -qi "berkeley"; then
+  if ls ~/Library/Fonts /Library/Fonts 2>/dev/null | grep -qi "berkeley"; then
     ok "Berkeley Mono installed"
   else
     warn "Berkeley Mono not found (paid — berkeleygraphics.com)"
   fi
+
+  [[ -f "$FAILED_PACKAGES" ]] && { header "Packages"; warn "$(wc -l < "$FAILED_PACKAGES" | xargs) package(s) failed previously — '${SCRIPT_NAME} retry-failed'"; }
+  return 0
+}
+
+cmd_retry_failed() {
+  [[ -f "$FAILED_PACKAGES" ]] || { info "No failed packages recorded"; return 0; }
+  header "Retrying failed packages"
+
+  local remaining=() entry ptype pname tried=0 ok_count=0
+  while IFS= read -r entry; do
+    [[ -z "$entry" ]] && continue
+    tried=$((tried + 1))
+    ptype="${entry%%:*}"; pname="${entry#*:}"
+    info "retrying $ptype: $pname"
+    if brew_install_one "$ptype" "$pname" >/dev/null 2>&1; then
+      ok "installed $pname"; ok_count=$((ok_count + 1))
+    else
+      warn "still failing: $pname"; remaining+=("$entry")
+    fi
+  done < "$FAILED_PACKAGES"
+
+  if [[ ${#remaining[@]} -eq 0 ]]; then
+    rm -f "$FAILED_PACKAGES"
+    ok "all $tried package(s) now installed"
+  else
+    printf '%s\n' "${remaining[@]}" > "$FAILED_PACKAGES"
+    warn "$ok_count/$tried installed; ${#remaining[@]} still failing"
+    return 1
+  fi
+}
+
+cmd_edit() {
+  local editor="${EDITOR:-nvim}"
+  has "$editor" || { fail "editor '$editor' not found"; return 1; }
+  exec "$editor" "$DOTFILES_DIR"
+}
+
+command_help() {
+  case "$1" in
+    init)   echo "${bold}dot init${reset} [--skip-ssh] [--skip-shell]"; echo; echo "  Run every setup step in order. Idempotent — safe to re-run."; echo "  Steps: Homebrew, Brewfile, stow, mise, TypeScript, fish shell, SSH key." ;;
+    update) echo "${bold}dot update${reset}"; echo; echo "  Pull the repo, update and upgrade Homebrew, re-stow, upgrade mise tools."; echo "  Prompts before upgrading packages." ;;
+    doctor) echo "${bold}dot doctor${reset}"; echo; echo "  Report tools, stow state, secrets, broken symlinks, login shell and fonts."; echo "  Changes nothing." ;;
+    stow)   echo "${bold}dot stow${reset}"; echo; echo "  Re-link home/ into \$HOME. Run after adding a file outside a stowed dir." ;;
+    edit)   echo "${bold}dot edit${reset}"; echo; echo "  Open ${DOTFILES_DIR/#$HOME/~} in \$EDITOR (currently ${EDITOR:-nvim})." ;;
+    retry-failed) echo "${bold}dot retry-failed${reset}"; echo; echo "  Retry packages recorded in .failed-packages by a previous init." ;;
+    *) fail "unknown command: $1"; return 1 ;;
+  esac
 }
 
 cmd_help() {
+  [[ $# -gt 0 ]] && { command_help "$1"; return; }
   cat <<EOF
-${bold}dot${reset} — machine setup for these dotfiles
+${bold}${SCRIPT_NAME}${reset} — machine setup for these dotfiles (v${VERSION})
 
-  dot init [--skip-ssh] [--skip-shell]   run every setup step (idempotent)
-  dot doctor                             report what is missing
-  dot stow                               re-link dotfiles into \$HOME
-  dot help                               this message
+${bold}USAGE${reset}
+    ${SCRIPT_NAME} COMMAND [ARGS]
+
+${bold}COMMANDS${reset}
+    init [--skip-ssh] [--skip-shell]   run every setup step (idempotent)
+    update                             pull, upgrade brew + mise, re-stow
+    doctor                             report what is missing, change nothing
+    stow                               re-link dotfiles into \$HOME
+    retry-failed                       retry packages a previous init could not install
+    edit                               open the repo in \$EDITOR
+    help [COMMAND]                     this message, or help for one command
+
+${bold}OPTIONS${reset}
+    --version                          print version
+
+Any command also accepts -h / --help.
 EOF
 }
 
-case "${1:-help}" in
-  init)   shift; cmd_init "$@" ;;
-  doctor) cmd_doctor ;;
-  stow)   header "Stow dotfiles"; stow_dotfiles ;;
-  help|-h|--help) cmd_help ;;
-  *) fail "unknown command: $1"; echo; cmd_help; exit 1 ;;
-esac
+main() {
+  local cmd="${1:-help}"; shift || true
+  case "${1:-}" in -h|--help) cmd_help "$cmd"; return 0 ;; esac
+
+  case "$cmd" in
+    init)         cmd_init "$@" ;;
+    update)       cmd_update "$@" ;;
+    doctor)       cmd_doctor "$@" ;;
+    stow)         header "Stow dotfiles"; stow_dotfiles ;;
+    retry-failed) cmd_retry_failed "$@" ;;
+    edit)         cmd_edit "$@" ;;
+    help)         cmd_help "$@" ;;
+    --version)    echo "${SCRIPT_NAME} ${VERSION}" ;;
+    -h|--help)    cmd_help ;;
+    *) fail "unknown command: $cmd"; echo; cmd_help; exit 1 ;;
+  esac
+}
+
+main "$@"
