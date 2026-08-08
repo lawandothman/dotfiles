@@ -2,10 +2,6 @@
 
 Personal macOS dotfiles, symlinked into `$HOME` with [GNU Stow](https://www.gnu.org/software/stow/).
 
-Everything under `home/` mirrors `$HOME` exactly, so `home/.config/fish/config.fish`
-becomes `~/.config/fish/config.fish`. Because the files are symlinks, editing a
-config edits this repo directly — there is no apply step.
-
 ## Restore on a fresh machine
 
 ### 1. Prerequisites
