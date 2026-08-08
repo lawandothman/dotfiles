@@ -26,7 +26,9 @@ vim.keymap.set('n', '<C-i>', '<C-i>zz', { desc = 'Jump forward (centered)' })
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
-vim.keymap.set('n', '<leader>s', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = '[S]ubstitute word under cursor' })
+-- On S rather than <leader>s so the <leader>s search namespace has no leaf
+-- competing with it. Word-anchored, unlike the usual version of this mapping.
+vim.keymap.set('n', 'S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = '[S]ubstitute word under cursor' })
 vim.keymap.set('x', '<leader>p', [["_dP]])
 
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
