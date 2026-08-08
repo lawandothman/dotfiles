@@ -2,7 +2,7 @@
 
 Personal macOS dotfiles managed with [chezmoi](https://www.chezmoi.io/).
 
-Tracks: `nvim`, `ghostty`, `herdr`, `zsh`, `git`.
+Tracks: `nvim`, `ghostty`, `herdr`, `fish`, `starship`, `git`.
 
 ## Restore on a fresh machine
 
@@ -31,7 +31,7 @@ chezmoi init --apply git@github.com:lawandothman/dotfiles.git
 ```
 
 That places everything tracked in this repo (`~/.config/nvim`, `~/.config/ghostty`,
-`~/.config/herdr`, `~/.zshrc`, `~/.gitconfig`, ...) into `$HOME`.
+`~/.config/herdr`, `~/.config/fish`, `~/.gitconfig`, ...) into `$HOME`.
 
 ### 3. Tools used by the configs
 
@@ -54,10 +54,17 @@ brew bundle dump --force --file=~/.local/share/chezmoi/Brewfile
 Then `chezmoi cd`, **review the diff** (this repo is public — strip anything
 work-specific or private before committing), and commit.
 
+Make fish the login shell (it must be registered first):
+
 ```sh
-# oh-my-zsh + "vercel" theme (referenced in .zshrc)
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-# vercel theme: https://github.com/vercel-community/vercel-zsh
+echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
+chsh -s /opt/homebrew/bin/fish
+```
+
+kubectl completions are generated rather than tracked:
+
+```sh
+kubectl completion fish > ~/.config/fish/completions/kubectl.fish
 ```
 
 ### 4. Fonts
@@ -69,9 +76,11 @@ Ghostty config references:
 
 ### 5. Secrets (not in this repo)
 
-`.zshrc` sources `$HOME/.local/share/secrets/env.sh`. Restore that file from
-your password manager / backup before opening a new shell, or comment the
-line out temporarily.
+`~/.config/fish/conf.d/secrets.fish` sources
+`$HOME/.local/share/secrets/env.fish`, which sets `NPM_TOKEN` and
+`LOTTIE_GITHUB_PACKAGES_TOKEN` with `set -gx`. Restore it from your password
+manager before opening a new shell; the sourcing is guarded, so a missing file
+is not an error.
 
 ### 6. TypeScript native LSP (`tsgo`)
 
