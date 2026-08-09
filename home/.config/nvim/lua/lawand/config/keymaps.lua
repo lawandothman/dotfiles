@@ -61,6 +61,14 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+vim.keymap.set('n', 'H', '^', { desc = 'Jump to beginning of line' })
+vim.keymap.set('n', 'L', '$', { desc = 'Jump to end of line' })
+vim.keymap.set('x', 'H', '^', { desc = 'Move to beginning of line' })
+-- $<Left> stops one short of the newline; a bare $ makes vLd join the next line.
+vim.keymap.set('x', 'L', '$<Left>', { desc = 'Move to end of line' })
+
+vim.keymap.set('n', 'U', '<C-r>', { desc = 'Redo last change' })
+
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
