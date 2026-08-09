@@ -35,18 +35,12 @@ vim.keymap.set('x', '<leader>p', [["_dP]])
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps. goto_prev/goto_next were deprecated and are removed in
--- 0.13; vim.diagnostic.jump replaces them.
--- `float = true` was deprecated in 0.12 and is removed in 0.14; on_jump replaces
--- it. Border and source come from the float defaults in plugins/lsp.lua.
+-- 0.13; vim.diagnostic.jump replaces them. No float on arrival —
+-- tiny-inline-diagnostic renders the message at the cursor. <leader>d still
+-- opens one on demand.
 local function diagnostic_jump(count, severity)
   return function()
-    vim.diagnostic.jump {
-      count = count,
-      severity = severity,
-      on_jump = function(_, bufnr)
-        vim.diagnostic.open_float { bufnr = bufnr, scope = 'cursor', focus = false }
-      end,
-    }
+    vim.diagnostic.jump { count = count, severity = severity }
     vim.cmd 'normal! zz'
   end
 end
