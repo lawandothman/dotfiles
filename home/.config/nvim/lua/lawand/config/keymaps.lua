@@ -34,18 +34,31 @@ vim.keymap.set('x', '<leader>p', [["_dP]])
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
--- Diagnostic keymaps. goto_prev/goto_next are deprecated and removed in 0.13;
--- vim.diagnostic.jump replaces them but does not default `float` to true, so it
--- is passed explicitly to keep the popup on arrival.
-local function diagnostic_jump(count)
+-- Diagnostic keymaps. goto_prev/goto_next were deprecated and are removed in
+-- 0.13; vim.diagnostic.jump replaces them.
+-- `float = true` was deprecated in 0.12 and is removed in 0.14; on_jump replaces
+-- it. Border and source come from the float defaults in plugins/lsp.lua.
+local function diagnostic_jump(count, severity)
   return function()
-    vim.diagnostic.jump { count = count, float = true }
+    vim.diagnostic.jump {
+      count = count,
+      severity = severity,
+      on_jump = function(_, bufnr)
+        vim.diagnostic.open_float { bufnr = bufnr, scope = 'cursor', focus = false }
+      end,
+    }
     vim.cmd 'normal! zz'
   end
 end
 
+local severity = vim.diagnostic.severity
+
 vim.keymap.set('n', '[d', diagnostic_jump(-1), { desc = 'Go to previous [D]iagnostic message' })
 vim.keymap.set('n', ']d', diagnostic_jump(1), { desc = 'Go to next [D]iagnostic message' })
+vim.keymap.set('n', '[e', diagnostic_jump(-1, severity.ERROR), { desc = 'Go to previous [E]rror' })
+vim.keymap.set('n', ']e', diagnostic_jump(1, severity.ERROR), { desc = 'Go to next [E]rror' })
+vim.keymap.set('n', '[w', diagnostic_jump(-1, severity.WARN), { desc = 'Go to previous [W]arning' })
+vim.keymap.set('n', ']w', diagnostic_jump(1, severity.WARN), { desc = 'Go to next [W]arning' })
 vim.keymap.set('n', ']q', '<cmd>cnext<CR>zz', { desc = 'Next [Q]uickfix item' })
 vim.keymap.set('n', '[q', '<cmd>cprevious<CR>zz', { desc = 'Previous [Q]uickfix item' })
 vim.keymap.set('n', '<leader>d', function()
