@@ -19,6 +19,7 @@ return {
       'lua_ls',
       'prismals',
       'rust_analyzer',
+      'sqls',
       'tailwindcss',
       'taplo',
       'terraformls',

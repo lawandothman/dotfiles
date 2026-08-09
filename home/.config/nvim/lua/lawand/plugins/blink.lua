@@ -24,21 +24,10 @@ return {
     -- characters have been typed.
     sources = {
       default = { 'lsp', 'path', 'buffer' },
-      per_filetype = {
-        sql = { 'dadbod', 'lsp', 'path', 'buffer' },
-        mysql = { 'dadbod', 'lsp', 'path', 'buffer' },
-        plsql = { 'dadbod', 'lsp', 'path', 'buffer' },
-      },
       providers = {
         lsp = { score_offset = 1000 },
         path = { score_offset = 3 },
         buffer = { score_offset = -150, min_keyword_length = 3 },
-        -- Provided by vim-dadbod-completion, declared in sql.lua.
-        dadbod = {
-          name = 'Dadbod',
-          module = 'vim_dadbod_completion.blink',
-          score_offset = 900,
-        },
       },
     },
 
@@ -75,7 +64,6 @@ return {
                   lsp = 'LSP',
                   buffer = 'Buffer',
                   path = 'Path',
-                  Dadbod = 'DB',
                 }
                 return '[' .. (names[ctx.source_name] or ctx.source_name) .. ']'
               end,
