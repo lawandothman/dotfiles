@@ -15,6 +15,10 @@ adjust-cell-height = 1
 macos-titlebar-style = tabs
 title = " "
 
+# Left Option sends Alt so herdr's prefix+alt+N bindings fire. Right Option
+# still composes, which the British layout needs for # (option+3).
+macos-option-as-alt = left
+
 mouse-hide-while-typing = true
 
 window-save-state = always
