@@ -54,6 +54,10 @@ return {
       },
 
       highlight_groups = {
+        -- Normal* below is repainted to `bg`, so anything drawn around a float
+        -- has to follow or it shows as a band of the old background.
+        FloatBorder = { bg = bg, fg = 'muted' },
+        FloatTitle = { bg = bg, fg = 'foam' },
         TelescopeBorder = { bg = bg, fg = '#1F2329' },
         TelescopePromptBorder = { bg = bg, fg = '#1F2329' },
         TelescopeResultsBorder = { bg = bg, fg = '#1F2329' },
