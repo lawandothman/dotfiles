@@ -130,6 +130,17 @@ install_packages() {
 
 stow_dotfiles() {
   has stow || { fail "stow is not installed"; return 1; }
+
+  # Stow links a whole directory at once ("folding") when the target does not
+  # exist yet. A folded ~/.config *is* this repo, so every tool that later
+  # writes there — gh's OAuth token, gcloud, zed — writes inside it. Creating
+  # the directories first forces stow to link their contents individually.
+  if [[ -L "${HOME}/.config" ]]; then
+    warn "~/.config is folded into the repo — unfolding"
+    stow -D -d "$DOTFILES_DIR" -t "$HOME" home || return 1
+  fi
+  mkdir -p "${HOME}/.config" "${HOME}/.config/herdr" || return 1
+
   stow -R -d "$DOTFILES_DIR" -t "$HOME" home || return 1
   ok "Dotfiles stowed"
 }
@@ -345,7 +356,13 @@ cmd_doctor() {
   done
 
   header "Dotfiles"
-  [[ -L "${HOME}/.config/fish" ]] && ok "stowed (~/.config/fish is a symlink)" || fail "not stowed"
+  if [[ -L "${HOME}/.config" ]]; then
+    fail "~/.config is folded into the repo — run '${SCRIPT_NAME} stow' to unfold it"
+  elif [[ -L "${HOME}/.config/fish" ]]; then
+    ok "stowed (~/.config/fish is a symlink)"
+  else
+    fail "not stowed"
+  fi
   [[ -f "${HOME}/.local/share/secrets/env.fish" ]] && ok "secrets present" || fail "secrets missing — restore env.fish"
   [[ -f "$SSH_KEY" ]] && ok "SSH key present" || warn "no SSH key at ${SSH_KEY}"
   if echo "$PATH" | grep -q "$DOTFILES_DIR"; then
