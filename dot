@@ -150,21 +150,38 @@ install_typescript() {
   ok "TypeScript installed"
 }
 
-# The keybindings in home/.config/herdr/config.toml reference these by id, and
-# herdr accepts a config naming a plugin it does not have without complaining —
-# the binding just silently does nothing. Installs are global to the user, not
-# per-session, and need no running server.
-HERDR_PLUGINS=(
-  "paulbkim-dev/vim-herdr-navigation"
-)
+HERDR_CONFIG="${DOTFILES_DIR}/home/.config/herdr/config.toml"
+
+# The herdr config is the only list. Every plugin it binds carries its install
+# line as a comment beside the binding, so `owner/repo` is read straight back
+# out of there — nothing to keep in sync.
+herdr_plugin_sources() {
+  [[ -f "$HERDR_CONFIG" ]] || return 0
+  sed -n 's|^#[[:space:]]*herdr plugin install[[:space:]]\{1,\}\([^[:space:]]\{1,\}\).*|\1|p' "$HERDR_CONFIG" | sort -u
+}
+
+# Plugin ids as the bindings reference them: command = "<id>.<action>" inside a
+# block whose type is plugin_action. Other command blocks (popup, spawn) hold
+# shell paths, which also contain dots.
+herdr_bound_plugin_ids() {
+  [[ -f "$HERDR_CONFIG" ]] || return 0
+  awk '
+    /^\[\[/            { type = ""; cmd = "" }
+    /^type *= *"/      { t = $0; sub(/^type *= *"/, "", t); sub(/".*/, "", t); type = t }
+    /^command *= *"/   { c = $0; sub(/^command *= *"/, "", c); sub(/".*/, "", c); cmd = c }
+    type == "plugin_action" && cmd != "" { sub(/\..*/, "", cmd); print cmd; cmd = "" }
+  ' "$HERDR_CONFIG" | sort -u
+}
 
 install_herdr_plugins() {
   has herdr || { warn "herdr not found; skipping its plugins"; return 0; }
 
-  local installed src id rc=0
+  local installed src id rc=0 found=0
   installed="$(herdr plugin list 2>/dev/null || true)"
 
-  for src in "${HERDR_PLUGINS[@]}"; do
+  while read -r src; do
+    [[ -z "$src" ]] && continue
+    found=1
     id="${src##*/}"
     if grep -q -- "$id" <<<"$installed"; then
       ok "herdr plugin $id already installed"
@@ -177,7 +194,9 @@ install_herdr_plugins() {
       warn "Failed to install herdr plugin $id"
       rc=1
     fi
-  done
+  done < <(herdr_plugin_sources)
+
+  [[ $found -eq 0 ]] && info "no plugins referenced in herdr config"
   return $rc
 }
 
@@ -351,15 +370,23 @@ cmd_doctor() {
   fi
   [[ $theirs -gt 0 ]] && info "($theirs unrelated dangling link(s), not managed here)"
 
-  # A config binding a plugin that is not installed fails silently, so check.
+  # A config binding a plugin that is not installed fails silently, so check
+  # every id the bindings reference — not just the ones with an install line.
   header "Herdr plugins"
   if has herdr; then
-    local list src pid
+    local list pid sources
     list="$(herdr plugin list 2>/dev/null || true)"
-    for src in "${HERDR_PLUGINS[@]}"; do
-      pid="${src##*/}"
-      grep -q -- "$pid" <<<"$list" && ok "$pid installed" || warn "$pid missing — run '${SCRIPT_NAME} init'"
-    done
+    sources="$(herdr_plugin_sources)"
+    while read -r pid; do
+      [[ -z "$pid" ]] && continue
+      if grep -q -- "$pid" <<<"$list"; then
+        ok "$pid installed"
+      elif grep -q -- "/$pid\$" <<<"$sources"; then
+        warn "$pid missing — run '${SCRIPT_NAME} init'"
+      else
+        fail "$pid is bound but has no '# herdr plugin install …' line in config.toml"
+      fi
+    done < <(herdr_bound_plugin_ids)
   else
     warn "herdr not installed"
   fi
