@@ -12,11 +12,29 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Wrap markdown only. BufEnter as well as FileType so returning to a buffer
+-- restores the right setting; wrap is off globally in options.lua.
+vim.api.nvim_create_autocmd({ 'BufEnter', 'FileType' }, {
+  desc = 'Soft-wrap markdown, nothing else',
+  group = vim.api.nvim_create_augroup('custom-filetype-wrap', { clear = true }),
+  callback = function(args)
+    vim.opt_local.wrap = vim.bo[args.buf].filetype == 'markdown'
+  end,
+})
+
 -- Set conceallevel for JS/TS files
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'typescript', 'javascript', 'typescriptreact', 'javascriptreact' },
   callback = function()
     vim.opt_local.conceallevel = 2
+  end,
+})
+
+-- The 80-column ruler is noise in a file listing
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'oil',
+  callback = function()
+    vim.opt_local.colorcolumn = ''
   end,
 })
 
