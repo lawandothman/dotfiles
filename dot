@@ -225,7 +225,10 @@ generate_ssh_key() {
   ssh-keygen -t ed25519 -C "$GITHUB_EMAIL" -f "$SSH_KEY" -N "" || return 1
   ok "SSH key generated"
   has pbcopy && { pbcopy < "${SSH_KEY}.pub"; info "Public key copied to clipboard"; }
-  info "Add it at https://github.com/settings/keys"
+  # GitHub keeps authentication and signing keys in separate lists. Commits are
+  # signed with this key (see .gitconfig), so it has to be added to both or they
+  # show as Unverified.
+  info "Add it at https://github.com/settings/keys as BOTH an authentication key and a signing key"
 }
 
 # Berkeley Mono is paid, so it lives in a private repo rather than a Brewfile
