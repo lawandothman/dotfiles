@@ -47,6 +47,7 @@ REGISTRY=(
   "Herdr plugins    ;; -    ;; install_herdr_plugins ;; false ;; -"
   "mise tools       ;; mise ;; install_mise_tools ;; true  ;; -"
   "TypeScript LSP   ;; tsc  ;; install_typescript ;; false ;; -"
+  "macOS defaults   ;; -    ;; macos_defaults     ;; false ;; SKIP_MACOS"
   "fish login shell ;; fish ;; setup_fish         ;; false ;; SKIP_SHELL"
   "SSH key          ;; -    ;; generate_ssh_key   ;; false ;; SKIP_SSH"
   "Berkeley Mono    ;; -    ;; install_font       ;; false ;; SKIP_FONT"
@@ -269,20 +270,56 @@ install_font() {
   if [[ $n -gt 0 ]]; then ok "installed $n font file(s)"; else warn "no fonts found in the repo"; fi
 }
 
+# Dock autohide is intentionally not set here — it is off on this setup.
+macos_defaults() {
+  [[ "$(uname -s)" == "Darwin" ]] || { warn "not macOS — skipping"; return 0; }
+
+  defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+  defaults write NSGlobalDomain KeyRepeat -int 2
+  defaults write NSGlobalDomain InitialKeyRepeat -int 15
+
+  defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+  defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
+  defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+  defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+
+  defaults write NSGlobalDomain AppleInterfaceStyle -string Dark
+
+  # Tap to click is stored per input device; all three are needed.
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+  defaults write com.apple.AppleMultitouchTrackpad Clicking -bool true
+  defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+
+  defaults write com.apple.dock tilesize -int 23
+  defaults write com.apple.dock magnification -bool true
+  defaults write com.apple.dock show-recents -bool false
+
+  defaults write com.apple.finder ShowStatusBar -bool true
+  defaults write com.apple.finder FXPreferredViewStyle -string Nlsv
+  defaults write com.apple.finder NewWindowTarget -string PfHm
+
+  killall Dock Finder 2>/dev/null || true
+  ok "macOS defaults applied"
+  info "Keyboard and text settings finish applying after a logout."
+}
+
 # --- commands ---------------------------------------------------------------
 
 cmd_init() {
   local skip_ssh="${SKIP_SSH:-false}" skip_shell="${SKIP_SHELL:-false}" skip_font="${SKIP_FONT:-false}"
+  local skip_macos="${SKIP_MACOS:-false}"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --skip-ssh)   skip_ssh=true ;;
       --skip-shell) skip_shell=true ;;
       --skip-font)  skip_font=true ;;
+      --skip-macos) skip_macos=true ;;
       *) fail "unknown option: $1"; return 1 ;;
     esac
     shift
   done
   export SKIP_SSH="$skip_ssh" SKIP_SHELL="$skip_shell" SKIP_FONT="$skip_font"
+  export SKIP_MACOS="$skip_macos"
 
   header "Initializing dotfiles"
 
@@ -365,6 +402,12 @@ cmd_doctor() {
   fi
   [[ -f "${HOME}/.local/share/secrets/env.fish" ]] && ok "secrets present" || fail "secrets missing — restore env.fish"
   [[ -f "$SSH_KEY" ]] && ok "SSH key present" || warn "no SSH key at ${SSH_KEY}"
+  [[ -f "${HOME}/.hushlogin" ]] && ok "~/.hushlogin present" || warn "no ~/.hushlogin — terminals will print 'Last login'"
+  if [[ "$(defaults read NSGlobalDomain ApplePressAndHoldEnabled 2>/dev/null)" == "0" ]]; then
+    ok "key repeat on hold is enabled"
+  else
+    warn "press-and-hold is on — run '${SCRIPT_NAME} init' to reapply macOS defaults"
+  fi
   if echo "$PATH" | grep -q "$DOTFILES_DIR"; then
     ok "${DOTFILES_DIR/#$HOME/~} is on PATH"
   else
@@ -461,7 +504,7 @@ cmd_edit() {
 
 command_help() {
   case "$1" in
-    init)   echo "${bold}dot init${reset} [--skip-ssh] [--skip-shell]"; echo; echo "  Run every setup step in order. Idempotent — safe to re-run."; echo "  Steps: Homebrew, Brewfile, stow, mise, TypeScript, fish shell, SSH key." ;;
+    init)   echo "${bold}dot init${reset} [--skip-ssh] [--skip-shell] [--skip-font] [--skip-macos]"; echo; echo "  Run every setup step in order. Idempotent — safe to re-run."; echo "  Steps: Homebrew, Brewfile, stow, herdr plugins, mise, TypeScript,"; echo "  macOS defaults, fish shell, SSH key, Berkeley Mono." ;;
     update) echo "${bold}dot update${reset}"; echo; echo "  Pull the repo, update and upgrade Homebrew, re-stow, upgrade mise tools."; echo "  Prompts before upgrading packages." ;;
     doctor) echo "${bold}dot doctor${reset}"; echo; echo "  Report tools, stow state, secrets, broken symlinks, login shell and fonts."; echo "  Changes nothing." ;;
     stow)   echo "${bold}dot stow${reset}"; echo; echo "  Re-link home/ into \$HOME. Run after adding a file outside a stowed dir." ;;
@@ -480,7 +523,7 @@ ${bold}USAGE${reset}
     ${SCRIPT_NAME} COMMAND [ARGS]
 
 ${bold}COMMANDS${reset}
-    init [--skip-ssh] [--skip-shell] [--skip-font]
+    init [--skip-ssh] [--skip-shell] [--skip-font] [--skip-macos]
                                        run every setup step (idempotent)
     update                             pull, upgrade brew + mise, re-stow
     doctor                             report what is missing, change nothing

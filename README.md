@@ -25,11 +25,16 @@ re-running it is safe.
 | Herdr plugins | `herdr plugin install` — the installs themselves are not tracked |
 | mise tools | `mise install` — node, bun, pnpm, go, terraform |
 | TypeScript LSP | global `typescript` 7, which nvim runs as `tsc --lsp` |
+| macOS defaults | key repeat, press-and-hold, text substitutions, Dock, Finder |
 | fish login shell | adds fish to `/etc/shells`, then `chsh` |
 | SSH key | ed25519, and prints where to paste the public half |
 | Berkeley Mono | clones the private font repo and installs it |
 
-Skip the interactive steps with `--skip-ssh`, `--skip-shell` and `--skip-font`.
+Skip steps with `--skip-ssh`, `--skip-shell`, `--skip-font` and `--skip-macos`.
+
+The macOS step only writes settings this setup actually deviates from Apple's
+defaults on, so it is safe to re-run. Key repeat and text substitution changes
+finish applying after a logout.
 
 `dot doctor` reports what is present and what is missing without changing
 anything.
