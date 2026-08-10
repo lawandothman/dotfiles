@@ -23,6 +23,12 @@ return {
         transparency = false,
       },
 
+      -- Rose Pine blends every tinted background against base, so overriding it
+      -- here rather than repainting afterwards keeps those blends in gamut.
+      palette = {
+        main = { base = bg },
+      },
+
       groups = {
         border = 'muted',
         link = 'iris',
@@ -55,29 +61,34 @@ return {
       },
 
       highlight_groups = {
-        -- Normal* below is repainted to `bg`, so anything drawn around a float
-        -- has to follow or it shows as a band of the old background.
+        NormalFloat = { bg = bg },
+        NormalSB = { bg = bg },
         FloatBorder = { bg = bg, fg = border },
         FloatTitle = { bg = bg, fg = 'foam' },
+
         TelescopeBorder = { bg = bg, fg = border },
         TelescopePromptBorder = { bg = bg, fg = border },
         TelescopeResultsBorder = { bg = bg, fg = border },
         TelescopePreviewBorder = { bg = bg, fg = border },
+
+        -- highlight_med for the selected row: the menu sits on the editor
+        -- background, so the selection needs its own elevation to be legible.
+        Pmenu = { bg = bg, fg = 'subtle' },
+        PmenuSel = { bg = 'highlight_med', fg = 'text' },
+        PmenuSbar = { bg = bg },
+        PmenuThumb = { bg = 'highlight_med' },
+        BlinkCmpMenu = { bg = bg },
+        BlinkCmpMenuBorder = { bg = bg, fg = border },
+        BlinkCmpMenuSelection = { bg = 'highlight_med', fg = 'text' },
+        BlinkCmpDoc = { bg = bg },
+        BlinkCmpDocBorder = { bg = bg, fg = border },
+        BlinkCmpSignatureHelp = { bg = bg },
+        BlinkCmpSignatureHelpBorder = { bg = bg, fg = border },
+
+        DiffviewNormal = { bg = bg },
+        DiffviewWinSeparator = { bg = bg, fg = 'muted' },
       },
     }
     vim.cmd.colorscheme 'rose-pine'
-
-    local groups = {
-      'Normal',
-      'NormalNC', -- Non-current windows
-      'NormalFloat', -- Floating windows
-      'NormalSB', -- Sidebar windows
-      'SignColumn',
-      'EndOfBuffer',
-    }
-
-    for _, group in ipairs(groups) do
-      vim.api.nvim_set_hl(0, group, { bg = bg })
-    end
   end,
 }
