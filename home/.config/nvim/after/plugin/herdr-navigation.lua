@@ -1,11 +1,13 @@
--- Seamless <C-h/j/k/l> between Neovim splits and Herdr panes: move between
--- splits, and at a split edge hand off to Herdr so focus crosses into the
--- neighbouring pane. Outside Herdr it falls back to plain window navigation.
+-- vim-herdr-navigation — Neovim side, from paulbkim-dev/vim-herdr-navigation.
+--
+-- Move between Neovim splits, and at a split edge hand off to Herdr so focus
+-- crosses into the neighbouring pane. Lives in after/plugin so it wins over any
+-- other <C-h/j/k/l> mapping.
 
-local function navigate(wincmd, direction)
-  local previous_window = vim.api.nvim_get_current_win()
+local function nav(wincmd, dir)
+  local prev = vim.api.nvim_get_current_win()
   vim.cmd('wincmd ' .. wincmd)
-  if vim.api.nvim_get_current_win() ~= previous_window then
+  if vim.api.nvim_get_current_win() ~= prev then
     return
   end
 
@@ -14,14 +16,16 @@ local function navigate(wincmd, direction)
     if herdr == nil or herdr == '' then
       herdr = 'herdr'
     end
-    vim.fn.system { herdr, 'pane', 'focus', '--direction', direction, '--current' }
+    -- --pane, not --current: --current resolves to the server's globally
+    -- focused pane, which is not necessarily the one this Neovim is in.
+    vim.fn.system { herdr, 'pane', 'focus', '--direction', dir, '--pane', vim.env.HERDR_PANE_ID }
   end
 end
 
-local function map(lhs, wincmd, direction, description)
+local function map(lhs, wincmd, dir, desc)
   vim.keymap.set('n', lhs, function()
-    navigate(wincmd, direction)
-  end, { silent = true, noremap = true, desc = description })
+    nav(wincmd, dir)
+  end, { silent = true, noremap = true, desc = desc })
 end
 
 map('<C-h>', 'h', 'left', 'Navigate left (Vim/Herdr)')

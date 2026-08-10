@@ -346,14 +346,33 @@ description = "Find a repo and open it as a workspace"
 width = "70%"
 height = "60%"
 
-# Seamless <C-h/j/k/l> between Neovim splits and Herdr panes needs the
-# vim-herdr-navigation plugin, which has no install path in the CLI yet.
-# Binding these bare would stop Neovim ever receiving its own <C-h>.
-# [[keys.command]]
-# key = "ctrl+h"
-# type = "plugin_action"
-# command = "vim-herdr-navigation.left"
-# description = "Navigate left (Vim/Herdr)"
+# Seamless <C-h/j/k/l> between Neovim splits and Herdr panes. The plugin checks
+# the pane's foreground process: Vim gets the chord forwarded, anything else
+# moves pane focus. Install with:
+#   herdr plugin install paulbkim-dev/vim-herdr-navigation
+[[keys.command]]
+key = "ctrl+h"
+type = "plugin_action"
+command = "vim-herdr-navigation.left"
+description = "Navigate left (Vim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "plugin_action"
+command = "vim-herdr-navigation.down"
+description = "Navigate down (Vim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "plugin_action"
+command = "vim-herdr-navigation.up"
+description = "Navigate up (Vim/Herdr)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "plugin_action"
+command = "vim-herdr-navigation.right"
+description = "Navigate right (Vim/Herdr)"
 
 # Legacy indexed shortcuts are parsed for compatibility. Prefer switch_tab,
 # switch_workspace, and focus_agent in new configurations.

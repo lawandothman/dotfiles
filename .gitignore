@@ -21,3 +21,7 @@ home/.config/nvim/lazy-lock.json
 
 # recorded by dot when a package fails to install
 .failed-packages
+
+# Herdr plugins are installed by `herdr plugin install`, not tracked here
+home/.config/herdr/plugins.json
+home/.config/herdr/plugins/
