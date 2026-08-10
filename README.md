@@ -10,7 +10,7 @@ Only two things have to happen by hand, because nothing exists yet:
 xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-git clone https://github.com/lawandothman/dotfiles.git ~/.dotfiles
+git clone https://github.com/lawandothman/.dotfiles.git ~/.dotfiles
 ~/.dotfiles/dot init
 ```
 
