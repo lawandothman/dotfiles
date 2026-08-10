@@ -45,6 +45,7 @@ REGISTRY=(
   "Brewfile         ;; -    ;; install_packages   ;; true  ;; -"
   "Stow dotfiles    ;; stow ;; stow_dotfiles      ;; true  ;; -"
   "Herdr plugins    ;; -    ;; install_herdr_plugins ;; false ;; -"
+  "bat theme cache  ;; bat  ;; build_bat_cache    ;; false ;; -"
   "mise tools       ;; mise ;; install_mise_tools ;; true  ;; -"
   "TypeScript LSP   ;; tsc  ;; install_typescript ;; false ;; -"
   "macOS defaults   ;; -    ;; macos_defaults     ;; false ;; SKIP_MACOS"
@@ -144,6 +145,12 @@ stow_dotfiles() {
 
   stow -R -d "$DOTFILES_DIR" -t "$HOME" home || return 1
   ok "Dotfiles stowed"
+}
+
+build_bat_cache() {
+  has bat || { warn "bat is not installed (should have come from the Brewfile)"; return 1; }
+  bat cache --build >/dev/null 2>&1 || return 1
+  ok "bat theme cache built"
 }
 
 install_mise_tools() {
