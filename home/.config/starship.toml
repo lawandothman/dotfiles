@@ -1,12 +1,15 @@
 add_newline = false
 command_timeout = 2000
 
-format = "$character$directory$git_branch$git_status"
+# Modules listed explicitly, never $all — $all pulls in username, hostname,
+# cmd_duration and every language module. $line_break puts the prompt symbol on
+# its own line.
+format = "$directory$git_branch$git_status$line_break$character"
 
 [character]
 format = "$symbol "
-success_symbol = "[▲](bold white)"
-error_symbol = "[▲](bold red)"
+success_symbol = "[󰘧](bold green)"
+error_symbol = "[󰘧](bold red)"
 
 [directory]
 truncate_to_repo = true
@@ -14,4 +17,4 @@ truncation_length = 0
 
 [git_branch]
 symbol = " "
-truncation_length = 18
+truncation_length = 0
