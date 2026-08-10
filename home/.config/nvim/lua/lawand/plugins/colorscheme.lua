@@ -54,6 +54,7 @@ return {
       },
 
       highlight_groups = {
+        TelescopeBorder = { bg = bg, fg = '#1F2329' },
         TelescopePromptBorder = { bg = bg, fg = '#1F2329' },
         TelescopeResultsBorder = { bg = bg, fg = '#1F2329' },
         TelescopePreviewBorder = { bg = bg, fg = '#1F2329' },
