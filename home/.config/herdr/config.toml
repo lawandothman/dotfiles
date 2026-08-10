@@ -42,7 +42,7 @@ name = "rose-pine"
 # transparent. Every custom token defaults to unset.
 
 # Highlight and selection accent.
-accent = "#e1a345"
+accent = "#c4a7e7"
 # Sidebar and panel background.
 panel_bg = "#0D1017"
 # Lowest elevated surface color.
@@ -492,7 +492,7 @@ sidebar_width = 32
 # Accent color for highlights, borders, and navigation UI. Accepts #rrggbb,
 # named colors, or rgb(r,g,b).
 # Default: "cyan".
-accent = "#e1a345"
+accent = "#c4a7e7"
 
 [ui.sidebar.agents]
 # Blank rows between expanded Agent entries. At most 16 rows and 16 tokens per

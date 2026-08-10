@@ -4,6 +4,7 @@ return {
   priority = 1000, -- make sure to load this before all the other start plugins
   config = function()
     local bg = '#0D1017'
+    local border = '#1F2329'
     require('rose-pine').setup {
       variant = 'main', -- auto, main, moon, or dawn
       dark_variant = 'main', -- main, moon, or dawn
@@ -56,12 +57,12 @@ return {
       highlight_groups = {
         -- Normal* below is repainted to `bg`, so anything drawn around a float
         -- has to follow or it shows as a band of the old background.
-        FloatBorder = { bg = bg, fg = 'muted' },
+        FloatBorder = { bg = bg, fg = border },
         FloatTitle = { bg = bg, fg = 'foam' },
-        TelescopeBorder = { bg = bg, fg = '#1F2329' },
-        TelescopePromptBorder = { bg = bg, fg = '#1F2329' },
-        TelescopeResultsBorder = { bg = bg, fg = '#1F2329' },
-        TelescopePreviewBorder = { bg = bg, fg = '#1F2329' },
+        TelescopeBorder = { bg = bg, fg = border },
+        TelescopePromptBorder = { bg = bg, fg = border },
+        TelescopeResultsBorder = { bg = bg, fg = border },
+        TelescopePreviewBorder = { bg = bg, fg = border },
       },
     }
     vim.cmd.colorscheme 'rose-pine'
