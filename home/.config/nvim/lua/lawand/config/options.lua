@@ -47,6 +47,9 @@ vim.opt.timeoutlen = 300
 vim.opt.completeopt = 'menuone,noselect'
 vim.opt.termguicolors = true
 
+-- Fuzzy command-line completion, so :chkh finds :checkhealth
+vim.opt.wildoptions:append 'fuzzy'
+
 -- Don't show the mode, since it's already in status line
 vim.opt.showmode = false
 
