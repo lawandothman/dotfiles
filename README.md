@@ -22,6 +22,7 @@ re-running it is safe.
 | Homebrew | installs it if missing |
 | Brewfile | `brew bundle` — formulae, casks, fonts |
 | Stow dotfiles | symlinks `home/` into `$HOME` |
+| Herdr plugins | `herdr plugin install` — the installs themselves are not tracked |
 | mise tools | `mise install` — node, bun, pnpm, go, terraform |
 | TypeScript LSP | global `typescript` 7, which nvim runs as `tsc --lsp` |
 | fish login shell | adds fish to `/etc/shells`, then `chsh` |

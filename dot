@@ -44,6 +44,7 @@ REGISTRY=(
   "Homebrew         ;; brew ;; install_homebrew   ;; true  ;; -"
   "Brewfile         ;; -    ;; install_packages   ;; true  ;; -"
   "Stow dotfiles    ;; stow ;; stow_dotfiles      ;; true  ;; -"
+  "Herdr plugins    ;; -    ;; install_herdr_plugins ;; false ;; -"
   "mise tools       ;; mise ;; install_mise_tools ;; true  ;; -"
   "TypeScript LSP   ;; tsc  ;; install_typescript ;; false ;; -"
   "fish login shell ;; fish ;; setup_fish         ;; false ;; SKIP_SHELL"
@@ -147,6 +148,37 @@ install_typescript() {
   info "Installing TypeScript 7 (nvim's tsgo LSP runs tsc --lsp)..."
   npm install -g typescript || return 1
   ok "TypeScript installed"
+}
+
+# The keybindings in home/.config/herdr/config.toml reference these by id, and
+# herdr accepts a config naming a plugin it does not have without complaining —
+# the binding just silently does nothing. Installs are global to the user, not
+# per-session, and need no running server.
+HERDR_PLUGINS=(
+  "paulbkim-dev/vim-herdr-navigation"
+)
+
+install_herdr_plugins() {
+  has herdr || { warn "herdr not found; skipping its plugins"; return 0; }
+
+  local installed src id rc=0
+  installed="$(herdr plugin list 2>/dev/null || true)"
+
+  for src in "${HERDR_PLUGINS[@]}"; do
+    id="${src##*/}"
+    if grep -q -- "$id" <<<"$installed"; then
+      ok "herdr plugin $id already installed"
+      continue
+    fi
+    info "Installing herdr plugin $id..."
+    if herdr plugin install "$src" --yes; then
+      ok "herdr plugin $id installed"
+    else
+      warn "Failed to install herdr plugin $id"
+      rc=1
+    fi
+  done
+  return $rc
 }
 
 setup_fish() {
@@ -318,6 +350,19 @@ cmd_doctor() {
     warn "$ours link(s) point at missing repo files — run '${SCRIPT_NAME} stow'"
   fi
   [[ $theirs -gt 0 ]] && info "($theirs unrelated dangling link(s), not managed here)"
+
+  # A config binding a plugin that is not installed fails silently, so check.
+  header "Herdr plugins"
+  if has herdr; then
+    local list src pid
+    list="$(herdr plugin list 2>/dev/null || true)"
+    for src in "${HERDR_PLUGINS[@]}"; do
+      pid="${src##*/}"
+      grep -q -- "$pid" <<<"$list" && ok "$pid installed" || warn "$pid missing — run '${SCRIPT_NAME} init'"
+    done
+  else
+    warn "herdr not installed"
+  fi
 
   header "Shell"
   local current; current="$(dscl . -read "$HOME" UserShell 2>/dev/null | awk '{print $2}')"
