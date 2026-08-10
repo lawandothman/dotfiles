@@ -15,13 +15,10 @@ return {
       --   },
       -- },
 
-      default = {
-        disable_diagnostics = false,
-      },
       view = {
+        -- diff3_mixed shows the common ancestor next to LOCAL and REMOTE.
         merge_tool = {
-          disable_diagnostics = false,
-          winbar_info = true,
+          layout = 'diff3_mixed',
         },
       },
       enhanced_diff_hl = true, -- See ':h diffview-config-enhanced_diff_hl'
