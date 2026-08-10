@@ -17,4 +17,3 @@ truncation_length = 0
 
 [git_branch]
 symbol = " "
-truncation_length = 0
