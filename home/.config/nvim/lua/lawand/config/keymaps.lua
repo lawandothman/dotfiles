@@ -76,9 +76,6 @@ vim.keymap.set('x', 'L', '$<Left>', { desc = 'Move to end of line' })
 
 vim.keymap.set('n', 'U', '<C-r>', { desc = 'Redo last change' })
 
--- <C-hjkl> window navigation lives in after/plugin/herdr-navigation.lua, which
--- also hands off to Herdr at a split edge.
-
 vim.keymap.set('n', '<leader>e', function()
   require('oil').toggle_float()
 end, { desc = 'Open Oil' })
