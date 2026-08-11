@@ -12,6 +12,11 @@ return {
     view_options = {
       show_hidden = true,
     },
+    -- Oil already sends willRenameFiles/didRenameFiles; this writes the buffers
+    -- the LSP edits in response, but only those with nothing unsaved.
+    lsp_file_methods = {
+      autosave_changes = 'unmodified',
+    },
   },
   dependencies = { 'nvim-tree/nvim-web-devicons' },
 }

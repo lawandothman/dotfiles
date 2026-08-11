@@ -21,14 +21,6 @@ return {
   },
   { 'windwp/nvim-ts-autotag', event = { 'BufReadPre', 'BufNewFile' }, opts = {} },
   {
-    'stevearc/dressing.nvim',
-    dependencies = { 'MunifTanjim/nui.nvim' },
-    opts = {},
-    config = function()
-      require('dressing').setup()
-    end,
-  },
-  {
     'mbbill/undotree',
     keys = {
       {
